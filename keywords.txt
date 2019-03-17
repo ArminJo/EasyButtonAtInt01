@@ -1,0 +1,22 @@
+#######################################
+# Syntax Coloring Map For EasyButton
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+EasyButton  KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init	KEYWORD2
+updateButtonPressDuration	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+USE_BUTTON_0	LITERAL1
+USE_BUTTON_1	LITERAL1
