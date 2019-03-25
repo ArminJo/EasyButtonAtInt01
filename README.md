@@ -1,7 +1,6 @@
 # EasyButton
-Arduino library for handling push buttons at INT0 and / or INT1 pin (pin 2 / 3).<br/>
-The library is totally based on interrupt.<br/>
-Debouncing is implemented in a not blocking way! It is merely done by ignoring a button change within the debouncing time.
+Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin (pin 2 / 3).<br/>
+The library is totally based on interrupt and debouncing is implemented in a not blocking way. It is merely done by ignoring a button change within the debouncing time.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/ArminJo/EasyButtonAtInt01.svg?branch=master)](https://travis-ci.org/ArminJo/EasyButtonAtInt01)

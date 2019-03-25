@@ -1,7 +1,7 @@
 /*
  * EasyButtonAtInt01.h
  *
- *  Arduino library for handling push buttons at INT0 and / or INT1 pin (pin 2 / 3).
+ *  Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin (pin 2 / 3).
  *  The library is totally based on interrupt.
  *  Debouncing is implemented in a not blocking way! It is merely done by ignoring a button change within the debouncing time.
  *
