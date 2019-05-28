@@ -5,7 +5,7 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
-EasyButton  KEYWORD1
+EasyButton	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
