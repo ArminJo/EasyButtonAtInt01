@@ -14,6 +14,8 @@ before_install:
    - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
 script:
    - build_platform uno
+   - build_platform leonardo
+   - build_platform trinket
 notifications:
   email:
     on_success: always

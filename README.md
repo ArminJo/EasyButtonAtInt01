@@ -41,3 +41,12 @@ void loop() {}
 ## Handling multiple definition error
 If you get the error "multiple definition of `__vector_1'" (or `__vector_2') because another library uses the attachInterrupt() function, 
 then comment out the #define USE_ATTACH_INTERRUPT al line 61 in EasyButtonAtInt01.h.
+
+# Travis CI
+The EasyButton library examples are built on Travis CI for the following boards:
+
+- Arduino Uno
+- Arduino Leonardo
+- Adafruit Trinket (using ATTiny85)
+
+#### If you find this library useful, please give it a star.
