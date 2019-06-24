@@ -164,6 +164,11 @@ public:
         init();
     }
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#define EICRA  MCUCR
+#define EIFR   GIFR
+#define EIMSK  GIMSK
+#endif
     /*
      * Sets pin 2 mode to INPUT_PULLUP and enables INT0 Interrupt on any logical change.
      */

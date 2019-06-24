@@ -36,6 +36,10 @@
 #define USE_BUTTON_0
 #include "EasyButtonAtInt01.h"
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+#include "TinySerialOut.h"
+#endif
+
 EasyButton Button0AtPin2(true);
 
 #define VERSION_EXAMPLE "1.0"
@@ -44,8 +48,10 @@ void setup() {
 // initialize the digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
+#if defined(__AVR_ATmega32U4__)
     while (!Serial)
         ; //delay for Leonardo
+#endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
 
