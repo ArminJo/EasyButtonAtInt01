@@ -429,3 +429,5 @@ ISR(INT1_vect) {
 #endif // not defined(USE_ATTACH_INTERRUPT)
 
 #endif /* EASY_BUTTON_AT_INT01_H_ */
+
+#pragma once

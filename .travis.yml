@@ -18,5 +18,7 @@ script:
    - build_platform trinket
 notifications:
   email:
+    recipients:
+      - armin.arduino@gmail.com  
     on_success: always
     on_failure: always
