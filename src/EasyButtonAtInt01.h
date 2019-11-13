@@ -5,6 +5,11 @@
  *  The library is totally based on interrupt.
  *  Debouncing is implemented in a not blocking way! It is merely done by ignoring a button change within the debouncing time.
  *
+ *  Usage:
+ *  #define USE_BUTTON_0
+ *  #include "EasyButtonAtInt01.h"
+ *  EasyButton Button0AtPin2(true);
+ *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
@@ -56,12 +61,12 @@
 //#define LED_FEEDBACK_FOR_DEBOUNCE_TEST
 #if defined (LED_FEEDBACK_FOR_DEBOUNCE_TEST)
 #ifndef BUTTON_TEST_FEEDBACK_LED_PIN
-#define BUTTON_TEST_FEEDBACK_LED_PIN LED_BUILTIN  // if not specified, use build in led - pin 13 on Uno board
+#define BUTTON_TEST_FEEDBACK_LED_PIN LED_BUILTIN  // if not specified, use built in led - pin 13 on Uno board
 #endif
 #endif
 
 //
-#define MEASURE_TIMING
+//#define MEASURE_TIMING
 #if defined(MEASURE_TIMING) || defined (LED_FEEDBACK_FOR_DEBOUNCE_TEST)
 #include "digitalWriteFast.h"
 #endif
@@ -139,7 +144,7 @@ public:
 #endif
 
     volatile bool ButtonStateIsActive;          // negative logic: true / active means button pin is LOW
-    volatile bool ButtonToggleState;            // toggle is on press, not on release
+    volatile bool ButtonToggleState;            // Toggle is on press, not on release - initial value is false
     volatile bool ButtonStateHasJustChanged;    // Flag to enable action only once. Only set to true by library
                                                 // Can be checked and set to false my main program to enable only one action per button press
     /*
