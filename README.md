@@ -1,6 +1,7 @@
 # EasyButton
 Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin (pin 2 / 3).<br/>
-The library is totally based on interrupt and debouncing is implemented in a not blocking way. It is merely done by ignoring a button change within the debouncing time.
+The library is totally based on interrupt and debouncing is implemented in a not blocking way. 
+It is merely done by ignoring a button change within the debouncing time.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -11,9 +12,9 @@ The library is totally based on interrupt and debouncing is implemented in a not
 To use a single button, it needs only:
 
 ```
-#define USE_BUTTON_0
+#define USE_BUTTON_0 // Enable code for Button at PCINT0
 #include "EasyButtonAtInt01.h"
-EasyButton Button0AtPin2(true);
+EasyButton Button0AtPin2(true); // true -> Button is connected to PCINT0
 
 void setup() {}
 void loop() {
@@ -22,12 +23,31 @@ void loop() {
 ...
 }
 ```
+To use 2 buttons, it needs only:
+```
+#define USE_BUTTON_0 // Enable code for Button at PCINT0
+#define USE_BUTTON_1 // Enable code for Button at PCINT1
+#include "EasyButtonAtInt01.h"
+EasyButton Button0AtPin2(true);  // true  -> Button is connected to PCINT0
+EasyButton Button0AtPin3(false); // false -> Button is not connected to PCINT0 => connected to PCINT1
 
-## Callback usage
-Even the use of a callback function is simple.
+void setup() {}
+void loop() {
+...
+    digitalWrite(LED_BUILTIN, Button0AtPin2.ButtonToggleState);
+    delay(50);
+    digitalWrite(LED_BUILTIN, Button0AtPin3.ButtonToggleState);
+    delay(50);
+...
+}
+```
+
+## Usage of callback function
+The callback function is is called on every button press with ButtonToggleState as parameter.<br/>
+Before callback function is called, interrupts are enabled! This allows the timer interrupt for millis() to work!
 
 ```
-#define USE_BUTTON_0
+#define USE_BUTTON_0 // Enable code for Button at PCINT0
 #include "EasyButtonAtInt01.h"
 
 void printButtonToggleState(bool aButtonToggleState) {
