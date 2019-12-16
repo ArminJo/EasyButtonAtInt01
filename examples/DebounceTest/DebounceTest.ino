@@ -33,14 +33,14 @@
 #define BUTTON_DEBOUNCING_MILLIS 2
 #define LED_FEEDBACK_FOR_DEBOUNCE_TEST
 
-#define USE_BUTTON_0
+#define USE_BUTTON_0  // Enable code for Button at PCINT0
 #include "EasyButtonAtInt01.h"
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
 #endif
 
-EasyButton Button0AtPin2(true);
+EasyButton Button0AtPin2(true); // true  -> Button is connected to PCINT0
 
 #define VERSION_EXAMPLE "1.0"
 
