@@ -30,6 +30,9 @@
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
+#if ! defined(LED_BUILTIN) && defined(ARDUINO_AVR_DIGISPARK)
+#define LED_BUILTIN PB1
+#endif
 #endif
 
 EasyButton Button0AtPin2(true); // true  -> Button is connected to PCINT0

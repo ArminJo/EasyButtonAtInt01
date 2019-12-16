@@ -27,18 +27,22 @@
 
 #include <Arduino.h>
 
+#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+#include "ATtinySerialOut.h"
+#if ! defined(LED_BUILTIN) && defined(ARDUINO_AVR_DIGISPARK)
+#define LED_BUILTIN PB1
+#endif
+#endif
+
 //#define USE_ATTACH_INTERRUPT
 //#define MEASURE_TIMING
 
 #define BUTTON_DEBOUNCING_MILLIS 2
 #define LED_FEEDBACK_FOR_DEBOUNCE_TEST
+#define BUTTON_TEST_FEEDBACK_LED_PIN LED_BUILTIN
 
 #define USE_BUTTON_0  // Enable code for Button at PCINT0
 #include "EasyButtonAtInt01.h"
-
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#include "ATtinySerialOut.h"
-#endif
 
 EasyButton Button0AtPin2(true); // true  -> Button is connected to PCINT0
 
@@ -50,7 +54,7 @@ void setup() {
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__)
     while (!Serial)
-        ; //delay for Leonardo
+    ; //delay for Leonardo
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
@@ -59,5 +63,5 @@ void setup() {
 }
 
 void loop() {
-    digitalWrite(12,Button0AtPin2.ButtonToggleState);
+    digitalWrite(12, Button0AtPin2.ButtonToggleState);
 }
