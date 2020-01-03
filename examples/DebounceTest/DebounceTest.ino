@@ -29,22 +29,23 @@
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#if ! defined(LED_BUILTIN) && defined(ARDUINO_AVR_DIGISPARK)
+#  if defined(ARDUINO_AVR_DIGISPARK)
+#undef LED_BUILTIN
 #define LED_BUILTIN PB1
-#endif
+#  endif
 #endif
 
 //#define USE_ATTACH_INTERRUPT
-//#define MEASURE_TIMING
+//#define MEASURE_INTERRUPT_TIMING
 
 #define BUTTON_DEBOUNCING_MILLIS 2
 #define LED_FEEDBACK_FOR_DEBOUNCE_TEST
 #define BUTTON_TEST_FEEDBACK_LED_PIN LED_BUILTIN
 
-#define USE_BUTTON_0  // Enable code for Button at PCINT0
+#define USE_BUTTON_0  // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
 
-EasyButton Button0AtPin2(true); // true  -> Button is connected to PCINT0
+EasyButton Button0AtPin2(true); // true  -> Button is connected to INT0
 
 #define VERSION_EXAMPLE "1.0"
 

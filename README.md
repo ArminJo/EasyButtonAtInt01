@@ -1,7 +1,9 @@
 # EasyButton
-Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin (pin 2 / 3).<br/>
-The library is totally based on interrupt and debouncing is implemented in a not blocking way. 
-It is merely done by ignoring a button change within the debouncing time.
+Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin.<br/>
+INT0 and INT1 are connected to Pin 2 / 3 on most Arduinos (ATmega328), to PB6 / PA3 on ATtiny167 and on ATtinyX5 we have only INT0 at PB2.<br/>
+
+The library is totally **based on interrupt** and **debouncing is implemented in a not blocking way**. 
+It is merely done by ignoring a button change within the debouncing time. So **button state is instantly available** without debouncing delay!
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -12,9 +14,9 @@ It is merely done by ignoring a button change within the debouncing time.
 To use a single button, it needs only:
 
 ```
-#define USE_BUTTON_0 // Enable code for Button at PCINT0
+#define USE_BUTTON_0 // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
-EasyButton Button0AtPin2(true); // true -> Button is connected to PCINT0
+EasyButton Button0AtPin2(true); // true -> Button is connected to INT0
 
 void setup() {}
 void loop() {
@@ -25,11 +27,11 @@ void loop() {
 ```
 To use 2 buttons, it needs only:
 ```
-#define USE_BUTTON_0 // Enable code for Button at PCINT0
-#define USE_BUTTON_1 // Enable code for Button at PCINT1
+#define USE_BUTTON_0 // Enable code for Button at INT0
+#define USE_BUTTON_1 // Enable code for Button at INT1
 #include "EasyButtonAtInt01.h"
-EasyButton Button0AtPin2(true);  // true  -> Button is connected to PCINT0
-EasyButton Button0AtPin3(false); // false -> Button is not connected to PCINT0 => connected to PCINT1
+EasyButton Button0AtPin2(true);  // true  -> Button is connected to INT0
+EasyButton Button0AtPin3(false); // false -> Button is not connected to INT0 => connected to INT1
 
 void setup() {}
 void loop() {
@@ -47,7 +49,7 @@ The callback function is is called on every button press with ButtonToggleState 
 Before callback function is called, interrupts are enabled! This allows the timer interrupt for millis() to work!
 
 ```
-#define USE_BUTTON_0 // Enable code for Button at PCINT0
+#define USE_BUTTON_0 // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
 
 void printButtonToggleState(bool aButtonToggleState) {
@@ -61,13 +63,25 @@ void loop() {}
 
 ## Handling multiple definition error
 If you get the error "multiple definition of `__vector_1'" (or `__vector_2') because another library uses the attachInterrupt() function,
-then comment out the #define USE_ATTACH_INTERRUPT at line 55 in EasyButtonAtInt01.h.
+then comment out the line 55 `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or 
+define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE:-(.<br/>
+
+# Revision History
+### Version 1.1.0
+- Ported to ATtinyX5 and ATiny167.
+- Support PinChangeInterrupt for ATtinies.
+- Long press detection support.
+
+### Version 1.1.0
+- initial version for ATmega328.
 
 # Travis CI
-The EasyButton library examples are built on Travis CI for the following boards:
+The EasyButton library examples are tested on Travis CI for the following boards:
 
 - Arduino Uno
 - Arduino Leonardo
-- Adafruit Trinket (using ATTiny85)
+- Digispark
+- Digispark Pro
+- Generic ATTiny85
 
 #### If you find this library useful, please give it a star.

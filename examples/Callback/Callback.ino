@@ -27,20 +27,24 @@
 
 //#define USE_ATTACH_INTERRUPT
 
-#define USE_BUTTON_0  // Enable code for Button at PCINT0
+#define USE_BUTTON_0  // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#if ! defined(LED_BUILTIN) && defined(ARDUINO_AVR_DIGISPARK)
+#  if defined(ARDUINO_AVR_DIGISPARK)
+#undef LED_BUILTIN
 #define LED_BUILTIN PB1
-#endif
+#  endif
 #endif
 
-void printButtonToggleState(bool aButtonToggleState) {
+/*
+ * The callback function
+ */
+void showButtonToggleState(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
 }
-EasyButton Button0AtPin2(true, &printButtonToggleState); // true  -> Button is connected to PCINT0
+EasyButton Button0AtPin2(true, &showButtonToggleState); // true  -> Button is connected to INT0
 
 #define VERSION_EXAMPLE "1.0"
 

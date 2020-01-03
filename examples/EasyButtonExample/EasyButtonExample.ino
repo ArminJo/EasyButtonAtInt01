@@ -1,6 +1,8 @@
 /*
  *  EasyButtonExample.cpp
  *
+ *  Example for one or two buttons using PA7/PCINT0 for button 1 on an ATtiny167
+ *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
@@ -24,32 +26,40 @@
 #include <Arduino.h>
 
 //#define USE_ATTACH_INTERRUPT
-//#define MEASURE_TIMING
+//#define MEASURE_INTERRUPT_TIMING
 
 //#define BUTTON_DEBOUNCING_MILLIS 80
 //#define LED_FEEDBACK_FOR_DEBOUNCE_TEST
 
-#define USE_BUTTON_0  // Enable code for Button at PCINT0
-//#define USE_BUTTON_1  // Enable code for Button at PCINT1
-#include "EasyButtonAtInt01.h"
-
+#define USE_BUTTON_0  // Enable code for button at INT0
+//#define USE_BUTTON_1  // Enable code for button at INT1
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#if ! defined(LED_BUILTIN) && defined(ARDUINO_AVR_DIGISPARK)
+#  if defined(ARDUINO_AVR_DIGISPARK)
+#undef LED_BUILTIN
 #define LED_BUILTIN PB1
-#endif
+#  elif defined(ARDUINO_AVR_DIGISPARKPRO)
+// On a Digispark Pro we have PB1 / D9 / PCB pin 1
+#undef LED_BUILTIN
+#define LED_BUILTIN (9)
+#define INT1_PIN 7   // PA7 use another PCINT0 pin for button 1 on ATtiny167
+#define INTENTIONALLY_USE_PCINT0_FOR_BUTTON1  // yes we know that we use the PCINT0 for button 1. It is no mistake.
+#  endif
 #endif
 
-EasyButton Button0AtPin2(true);  // true  -> Button is connected to PCINT0
+#include "EasyButtonAtInt01.h"
+
+EasyButton Button0AtPin3(true);  // true  -> button is connected to INT0
 #ifdef USE_BUTTON_1
-EasyButton Button0AtPin3(false); // false -> Button is not connected to PCINT0 => connected to PCINT1
+// The callback function for button1
+void printButtonToggleState(bool aButtonToggleState) {
+    Serial.print("Button1 ToggleState=");
+    Serial.println(aButtonToggleState);
+}
+EasyButton Button0AtPA7(false, &printButtonToggleState); // false -> button is not connected to INT0 but connected to INT1
 #endif
 
 #define VERSION_EXAMPLE "1.0"
-
-bool sOldButton0State; // negative logic: true means button pin is LOW
-bool sOldButton0StateHasChanged;
-bool sOldButton0ToggleState; // toggle on press, not on release
 
 long sOldDeltaMillis;
 
@@ -75,16 +85,20 @@ void printIfChangedAndUpdate(bool * aOldValue, bool aNewValue, const char * aStr
 }
 
 void loop() {
+    static bool sOldButton0State; // negative logic: true means button pin is LOW
+    static bool sOldButton0StateHasChanged;
+    static bool sOldButton0ToggleState; // toggle on press, not on release
+
     delay(10); // delay starts output with the next print and not in the middle of the prints, since the interrupt happened during the delay
-    printIfChangedAndUpdate(&sOldButton0StateHasChanged, Button0AtPin2.ButtonStateHasJustChanged, "StateHasChanged=");
-    printIfChangedAndUpdate(&sOldButton0State, Button0AtPin2.ButtonStateIsActive, "State=");
-    printIfChangedAndUpdate(&sOldButton0ToggleState, Button0AtPin2.ButtonToggleState, "ToggleState=");
-    // Acknowledge change flag
-    if (Button0AtPin2.ButtonStateHasJustChanged) {
-        Button0AtPin2.ButtonStateHasJustChanged = false;
+    printIfChangedAndUpdate(&sOldButton0StateHasChanged, Button0AtPin3.ButtonStateHasJustChanged, "StateHasChanged=");
+    printIfChangedAndUpdate(&sOldButton0State, Button0AtPin3.ButtonStateIsActive, "State=");
+    printIfChangedAndUpdate(&sOldButton0ToggleState, Button0AtPin3.ButtonToggleState, "ToggleState=");
+    // Acknowledge button state change flag
+    if (Button0AtPin3.ButtonStateHasJustChanged) {
+        Button0AtPin3.ButtonStateHasJustChanged = false;
         sOldButton0StateHasChanged = false;
     }
 #ifndef LED_FEEDBACK_FOR_DEBOUNCE_TEST
-    digitalWrite(LED_BUILTIN, Button0AtPin2.ButtonToggleState);
+    digitalWrite(LED_BUILTIN, Button0AtPin3.ButtonToggleState);
 #endif
 }
