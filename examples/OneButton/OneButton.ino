@@ -1,6 +1,8 @@
 /*
  *  OneButton.cpp
  *
+ *  Connect the button between pin 2 (ATtinyX7 pin 14) and ground.
+ *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
@@ -23,17 +25,18 @@
 
 #include <Arduino.h>
 
-//#define USE_ATTACH_INTERRUPT
+//#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
 #define USE_BUTTON_0  // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
 
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#include "ATtinySerialOut.h"
-#  if defined(ARDUINO_AVR_DIGISPARK)
-#undef LED_BUILTIN
+#if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
-#  endif
+#elif defined(ARDUINO_AVR_DIGISPARKPRO)
+// On a Digispark Pro we have PB1 / D9 / PCB pin 1
+#define LED_BUILTIN (9)
+#elif ! defined(LED_BUILTIN)
+#define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
 
 EasyButton Button0AtPin2(true); // true  -> Button is connected to INT0
@@ -41,8 +44,8 @@ EasyButton Button0AtPin2(true); // true  -> Button is connected to INT0
 #define VERSION_EXAMPLE "1.0"
 
 void setup() {
-// initialize the digital pin as an output.
-//    pinMode(LED_BUILTIN, OUTPUT); // not needed here, since it is done by button library
+    pinMode(LED_BUILTIN, OUTPUT);
+
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__)
     while (!Serial)

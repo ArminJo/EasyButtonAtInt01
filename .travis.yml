@@ -18,8 +18,9 @@ before_install:
 script:
 - build_platform uno
 - build_platform leonardo
-- build_platform ATtiny85_1MHz
 - build_platform Digispark_1MHz
+- build_platform DigisparkPro_16MHz
+- build_platform ATtiny85_1MHz
 notifications:
    email:
       recipients:

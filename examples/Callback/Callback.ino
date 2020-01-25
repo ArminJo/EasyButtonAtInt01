@@ -1,7 +1,7 @@
 /*
  *  Callback.cpp
  *
- *  Example for use of callback function at button press.
+ *  Example for use of callback function at button press as well as double press detection.
  *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
@@ -25,32 +25,28 @@
 
 #include <Arduino.h>
 
-//#define USE_ATTACH_INTERRUPT
+//#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
 #define USE_BUTTON_0  // Enable code for Button at INT0
 #include "EasyButtonAtInt01.h"
 
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#include "ATtinySerialOut.h"
-#  if defined(ARDUINO_AVR_DIGISPARK)
-#undef LED_BUILTIN
-#define LED_BUILTIN PB1
-#  endif
-#endif
-
-/*
- * The callback function
- */
-void showButtonToggleState(bool aButtonToggleState) {
-    digitalWrite(LED_BUILTIN, aButtonToggleState);
-}
+void showButtonToggleState(bool aButtonToggleState);    // The callback function
 EasyButton Button0AtPin2(true, &showButtonToggleState); // true  -> Button is connected to INT0
 
-#define VERSION_EXAMPLE "1.0"
+#define VERSION_EXAMPLE "1.1"
+
+#if defined(ARDUINO_AVR_DIGISPARK)
+#define LED_BUILTIN PB1
+#elif defined(ARDUINO_AVR_DIGISPARKPRO)
+// On a Digispark Pro we have PB1 / D9 / PCB pin 1
+#define LED_BUILTIN (9)
+#elif ! defined(LED_BUILTIN)
+#define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
+#endif
 
 void setup() {
-// initialize the digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
+
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__)
     while (!Serial)
@@ -58,10 +54,21 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-
 }
 
 void loop() {
     delay(10);
 }
 
+/*
+ * The callback function is called at each button press
+ */
+void showButtonToggleState(bool aButtonToggleState) {
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
+    /*
+     * Double press (< 200 ms) detection by calling checkForForDoublePress() once at button press time.
+     */
+    if (Button0AtPin2.checkForDoublePress(200)) {
+        Serial.println(F("Double press (< 200 ms) detected"));
+    }
+}
