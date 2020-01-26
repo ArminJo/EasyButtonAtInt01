@@ -28,9 +28,9 @@ INT0 and INT1 are connected to:
 To use a single button, it needs only:
 
 ```
-#define USE_BUTTON_0 // Enable code for Button at INT0
+#define USE_BUTTON_0 // Enable code for button at INT0
 #include "EasyButtonAtInt01.h"
-EasyButton Button0AtPin2(true); // true -> Button is connected to INT0
+EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
 void setup() {}
 void loop() {
@@ -63,13 +63,13 @@ The callback function is is called on every button press with ButtonToggleState 
 Before callback function is called, interrupts are enabled! This allows the timer interrupt for millis() to work!
 
 ```
-#define USE_BUTTON_0 // Enable code for Button at INT0
+#define USE_BUTTON_0 // Enable code for button at INT0
 #include "EasyButtonAtInt01.h"
 
 void printButtonToggleState(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
 }
-EasyButton Button0AtPin2(true, &printButtonToggleState);
+EasyButton Button0AtPin2(&printButtonToggleState); // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
 void setup() {}
 void loop() {}

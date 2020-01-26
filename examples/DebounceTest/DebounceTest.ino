@@ -31,12 +31,12 @@
 
 #define BUTTON_DEBOUNCING_MILLIS 2
 
-#define USE_BUTTON_0  // Enable code for Button at INT0
+#define USE_BUTTON_0  // Enable code for 1. button at INT0
 #include "EasyButtonAtInt01.h"
 
-EasyButton Button0AtPin2(true); // true  -> Button is connected to INT0
+EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#define VERSION_EXAMPLE "1.1"
+#define VERSION_EXAMPLE "2.0"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1

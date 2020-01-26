@@ -119,7 +119,7 @@
 
 //#define TRACE
 #ifdef TRACE
-#warning "If using \"TRACE\" the timing of the interrupt service routine changes, e.g. you will see more spikes, than expected"
+#warning "If using TRACE, the timing of the interrupt service routine changes, e.g. you will see more spikes, than expected!"
 #endif
 
 /*
@@ -230,15 +230,48 @@ public:
     volatile bool isButtonAtINT0;
     void (*ButtonPressCallback)(bool aButtonToggleState) = NULL; // if not null, is called on every button press with ButtonToggleState as parameter
 
+    /*
+     * Constructor deterministic if only one button was enabled
+     * If two buttons are enabled it is taken as the 1. button at INT0
+     */
+    EasyButton() {
+#if defined(USE_BUTTON_1) && not defined(USE_BUTTON_0)
+        init(false); // 2. button
+#else
+        init(true); // 1. button
+#endif
+    }
+/*
+ * The same with aButtonPressCallback
+ */
+    EasyButton(void (*aButtonPressCallback)(bool aButtonToggleState)) {
+        ButtonPressCallback = aButtonPressCallback;
+#if defined(USE_BUTTON_1) && not defined(USE_BUTTON_0)
+        init(false); // 2. button
+#else
+        init(true); // 1. button
+#endif
+    }
+
     EasyButton(bool aIsButtonAtINT0) {
-        isButtonAtINT0 = aIsButtonAtINT0;
-        init();
+#if defined(USE_BUTTON_0) && not defined(USE_BUTTON_1)
+        init(true); // 1. button
+#elif defined(USE_BUTTON_1) && not defined(USE_BUTTON_0)
+        init(false); // 2. button
+#else
+        init(aIsButtonAtINT0);
+#endif
     }
 
     EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState)) {
-        isButtonAtINT0 = aIsButtonAtINT0;
         ButtonPressCallback = aButtonPressCallback;
-        init();
+#if defined(USE_BUTTON_0) && not defined(USE_BUTTON_1)
+        init(true); // 1. button
+#elif defined(USE_BUTTON_1) && not defined(USE_BUTTON_0)
+        init(false); // 2. button
+#else
+        init(aIsButtonAtINT0);
+#endif
     }
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
@@ -249,7 +282,8 @@ public:
     /*
      * Sets pin 2 mode to INPUT_PULLUP and enables INT0 Interrupt on any logical change.
      */
-    void init() {
+    void init(bool aIsButtonAtINT0) {
+        isButtonAtINT0 = aIsButtonAtINT0;
 #if defined(MEASURE_INTERRUPT_TIMING)
         pinModeFast(BUTTON_TEST_TIMING_PIN, OUTPUT);
 #endif
@@ -276,7 +310,7 @@ public:
 
 #  if (! defined(ISC10)) || ((defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)) && INT1_PIN != 3)
 #    if defined(PCICR)
-        PCICR |= 1 << PCIE0; //PCINT0 (Pin change interrupt for Port PA0 to PA7) enable
+        PCICR |= 1 << PCIE0; // Enable pin change interrupt for port PA0 to PA7
         PCMSK0 = digitalPinToBitMask(INT1_PIN);
 #    else
         // ATtinyX5 no ISC10 flag existent
@@ -312,7 +346,7 @@ public:
 
 #  if (! defined(ISC10)) || ((defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)) && INT1_PIN != 3)
 #    if defined(PCICR)
-            PCICR |= 1 << PCIE0; //PCINT0 (Pin change interrupt for Port PA0 to PA7) enable
+            PCICR |= 1 << PCIE0; // Enable pin change interrupt for port PA0 to PA7
             PCMSK0 = digitalPinToBitMask(INT1_PIN);
 #    else
             // ATtinyX5 no ISC10 flag existent

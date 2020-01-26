@@ -28,8 +28,8 @@
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define BUTTON_DEBOUNCING_MILLIS 80
 
-#define USE_BUTTON_0  // Enable code for button at INT0
-//#define USE_BUTTON_1  // Enable code for button at INT1
+#define USE_BUTTON_0  // Enable code for 1. button at INT0
+//#define USE_BUTTON_1  // Enable code for 2. button at INT1 or PCINT[0:7]
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
 #include "ATtinyUtils.h" // for changeDigisparkClock()
@@ -38,13 +38,10 @@
 #endif
 #  if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
-#define LED_FEEDBACK_FOR_DEBOUNCE_TEST
 #  elif defined(ARDUINO_AVR_DIGISPARKPRO)
-// On a Digispark Pro we have PB1 / D9 / PCB pin 1
-#define LED_BUILTIN (9)
-#define LED_FEEDBACK_FOR_DEBOUNCE_TEST
+#define LED_BUILTIN (9) // On a Digispark Pro we have PB1 / D9 / PCB pin 1
 #define INT1_PIN 7   // use PCINT7/PA7 instead of INT1/PA3 for button 1 on ATtiny167
-#define INTENTIONALLY_USE_PCI0_FOR_BUTTON1  // yes we know that we use the PCI0 for button 1. It is no typo.
+#define INTENTIONALLY_USE_PCI0_FOR_BUTTON1  // yes we know that we use the PCINT[0:7] for button 1. It is no typo.
 #  else
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1 // define pin of built in LED for your ATtiny
@@ -58,7 +55,7 @@ EasyButton Button1AtPin3(true);  // true  -> button is connected to INT0
 bool sButtonLongPressDetected = false;
 // The callback function for button 2
 void printButtonToggleState(bool aButtonToggleState);
-EasyButton Button2AtPA7(false, &printButtonToggleState); // false -> button is not connected to INT0 but connected to INT1
+EasyButton Button2AtPA7(false, &printButtonToggleState); // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]
 #endif
 
 #define VERSION_EXAMPLE "2.0"

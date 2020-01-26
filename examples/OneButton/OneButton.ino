@@ -27,7 +27,7 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
-#define USE_BUTTON_0  // Enable code for Button at INT0
+#define USE_BUTTON_0  // Enable code for 1. button at INT0
 #include "EasyButtonAtInt01.h"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
@@ -39,9 +39,9 @@
 #define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
 
-EasyButton Button0AtPin2(true); // true  -> Button is connected to INT0
+EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#define VERSION_EXAMPLE "1.0"
+#define VERSION_EXAMPLE "2.0"
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
