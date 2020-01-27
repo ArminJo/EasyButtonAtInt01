@@ -28,7 +28,7 @@
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 
 void showButtonToggleState(bool aButtonToggleState);    // The callback function
 EasyButton Button0AtPin2(&showButtonToggleState);       // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0

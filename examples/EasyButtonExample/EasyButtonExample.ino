@@ -48,7 +48,7 @@
 #  endif
 #endif
 
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 
 EasyButton Button1AtPin3(true);  // true  -> button is connected to INT0
 #ifdef USE_BUTTON_1

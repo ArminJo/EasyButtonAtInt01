@@ -32,7 +32,7 @@
 #define BUTTON_DEBOUNCING_MILLIS 2
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 

@@ -19,7 +19,7 @@ Debouncing is merely done by ignoring a button change within the debouncing time
 
 INT0 and INT1 are connected to:
 - Pin 2 / 3 on most Arduinos (ATmega328*).
-- PB6 / PA3 on ATtiny167. To use one of PA0 to PA7 instead of PA3 just (re)define INT1_PIN before including *EasyButtonAtInt01.h*. E.g. `#define INT1_PIN 7`. See EasyButtonExample.cpp.
+- PB6 / PA3 on ATtiny167. To use one of PA0 to PA7 instead of PA3 just (re)define INT1_PIN before including *EasyButtonAtInt01.cpp.h*. E.g. `#define INT1_PIN 7`. See EasyButtonExample.cpp.
 - Only PB2 / INT0 at on ATtinyX5.
 
 
@@ -29,7 +29,7 @@ To use a single button, it needs only:
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
 void setup() {}
@@ -43,7 +43,7 @@ To use 2 buttons, it needs only:
 ```
 #define USE_BUTTON_0 // Enable code for Button at INT0
 #define USE_BUTTON_1 // Enable code for Button at INT1
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 EasyButton Button0AtPin2(true);  // true  -> Button is connected to INT0
 EasyButton Button0AtPin3(false); // false -> Button is not connected to INT0 => connected to INT1
 
@@ -64,7 +64,7 @@ Before callback function is called, interrupts are enabled! This allows the time
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0
-#include "EasyButtonAtInt01.h"
+#include "EasyButtonAtInt01.cpp.h"
 
 void printButtonToggleState(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
@@ -106,6 +106,7 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 - Analyzes maximum debouncing period.
 - Double button press detection support.
 - Very short button press handling.
+- Renamed to EasyButtonAtInt01.cpp.h
 
 ### Version 1.0.0
 - initial version for ATmega328.
