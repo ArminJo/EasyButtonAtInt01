@@ -39,7 +39,8 @@
 #  if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
 #  elif defined(ARDUINO_AVR_DIGISPARKPRO)
-#define LED_BUILTIN (9) // On a Digispark Pro we have PB1 / D9 / PCB pin 1
+#undef LED_BUILTIN    // In case we use another core e.g. in Eclipse
+#define LED_BUILTIN 9 // On a Digispark Pro we have PB1 / D9 / PCB pin 1
 #define INT1_PIN 7   // use PCINT7/PA7 instead of INT1/PA3 for button 1 on ATtiny167
 #define INTENTIONALLY_USE_PCI0_FOR_BUTTON1  // yes we know that we use the PCINT[0:7] for button 1. It is no typo.
 #  else

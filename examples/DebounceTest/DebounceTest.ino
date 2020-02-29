@@ -47,6 +47,8 @@ EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is 
 #define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 void setup() {
 // initialize the digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
@@ -58,9 +60,7 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-    Serial.print(F("Button debouncing time is reduced to "));
-    Serial.print(BUTTON_DEBOUNCING_MILLIS);
-    Serial.println(F(" ms"));
+    Serial.println(F("Button debouncing time is reduced to " STR(BUTTON_DEBOUNCING_MILLIS) " ms"));
 }
 
 void loop() {
