@@ -1,4 +1,4 @@
-# Before being able to push to my .github\workflows directories, 
+# Before being able to push to my .github\workflows directories,
 # I had to create a new personal token with workflow enabled at https://github.com/settings/tokens
 
 # This is the name of the workflow, visible on GitHub UI.
@@ -8,23 +8,21 @@ on: [push]
 jobs:
   build:
     name: ${{ matrix.arduino-boards-fqbn }} - test compiling examples
-    
+
     runs-on: ubuntu-latest # I picked Ubuntu to use shell scripts.
-    
-    env: 
-      # Space separated list with or without double quotes around the list. 
-      # If you need a libraries with a space in its name like Adafruit NeoPixel or Adafruit INA219
-      # I am sorry, but you must add them with double quotes in step "Install libraries" after $REQUIRED_LIBRARIES.
-      # e.g. then arduino-cli lib install $REQUIRED_LIBRARIES "Adafruit NeoPixel" "Adafruit INA219"; fi
-      # In this case the required libraries string must contain at least one character, you can use " ".
-      REQUIRED_LIBRARIES: ""
-      
+
+    env:
+      # Space separated list without double quotes around the list. 
+      # If you need a library with a space in its name, like Adafruit NeoPixel or Adafruit INA219, you must use double quotes
+      # around the name and have at least 2 entries, where the first must be without double quotes! You may use Servo as dummy entry.
+      REQUIRED_LIBRARIES:
+
       # Output colors
       RED: '\033[0;31m'
       GREEN: '\033[0;32m'
       YELLOW: '\033[1;33m'
       BLUE: '\033[0;34m'
-      
+
     strategy:
       matrix:
         # The matrix will produce one job for each configuration parameter of type `arduino-boards-fqbn`
@@ -39,42 +37,45 @@ jobs:
         arduino-boards-fqbn:
           - arduino:avr:uno
           - arduino:avr:leonardo
-          - arduino:avr:mega          
+          - arduino:avr:mega
           - digistump:avr:digispark-tiny1
           - digistump:avr:digispark-pro
           - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
 
         # Choose the right platform for the boards we want to test. (maybe in the future Arduino will automatically do this for you)
-        # This works like this: when the fqbn is "arduino:avr:uno" the variable `platform` is set to "arduino:avr". 
+        # This works like this: when the fqbn is "arduino:avr:uno" the variable `platform` is set to "arduino:avr".
         # Just take the first 2 token of the fqbn - this cannot be automatically done by GitHub workflow :-(
         #############################################################################################################
         include:
           - arduino-boards-fqbn: arduino:avr:uno
             platform: arduino:avr
-          
+
           - arduino-boards-fqbn: arduino:avr:leonardo
-            platform: arduino:avr          
+            platform: arduino:avr
 
           - arduino-boards-fqbn: arduino:avr:mega
             platform: arduino:avr
-                      
+
           - arduino-boards-fqbn: digistump:avr:digispark-tiny1  # ATtiny85 board @1 MHz
             platform: digistump:avr
-            examples-exclude: "EasyButtonExample" # Space separated list of examples to exclude in build
- 
+            # examples-build-properties / aka setting compiler.cpp.extra_flags does not work for digistump:avr platform
+            examples-exclude: EasyButtonExample # Space separated list of (unique substrings of) example names to exclude in build
+
           - arduino-boards-fqbn: digistump:avr:digispark-pro
             platform: digistump:avr
-                       
+
           - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal
             platform: ATTinyCore:avr
-            examples-exclude: "EasyButtonExample"
-            
+            examples-build-properties:
+              EasyButtonExample:
+                -DTX_PIN=PB0
+
       # Do not cancel all jobs / architectures if one job fails
       fail-fast: false
 
     # This is the list of steps this job will run.
     steps:
-    
+
       # First of all, we clone the repo using the `checkout` action.
       - name: Checkout
         uses: actions/checkout@master
@@ -83,25 +84,21 @@ jobs:
       # configure the Arduino CLI on the system.
       - name: Setup Arduino CLI
         uses: arduino/setup-arduino-cli@v1.0.0
-        
-      # Here we have only the matrix values for this job i.e. only one platform and fqbn
-      #- name: Dump matrix context
-      #  run: echo " ${{ toJson(matrix) }} "
-        
+
       - name: Link this repository as Arduino library
         run: |
           mkdir -p $HOME/Arduino/libraries
           ln -s $PWD $HOME/Arduino/libraries/.
-        
+
       - name: Install platform from build matrix
         run: |
           arduino-cli core update-index
-          if [ ""${{  matrix.platform }}"" == "" ]; then echo -e ""$RED"ERROR: platform missing for board ${{ matrix.arduino-boards-fqbn }}. Check your matrix.includes entries"; exit 1; fi
+          if [ "${{  matrix.platform }}" == "" ]; then echo -e ""$RED"ERROR: platform missing for board ${{ matrix.arduino-boards-fqbn }}. Check your matrix.includes entries"; exit 1; fi
           if [[ ${{  matrix.platform }} != *"arduino"* && ! -f ./arduino-cli.yaml ]]; then echo -e ""$RED"Non Arduino platform ${{  matrix.platform }} requested, but file arduino-cli.yaml is missing."; exit 1; fi
           arduino-cli core install ${{ matrix.platform }} # for each job / board one platform is installed
           arduino-cli board listall
           if [ ${{  matrix.platform }} == "esp32:esp32" ]; then pip install pyserial; fi
-          
+
       - name: List installed boards with their FQBN
         run: |
           arduino-cli board listall
@@ -111,41 +108,36 @@ jobs:
           # which arduino-cli # /opt/hostedtoolcache/arduino-cli/0.9.0/x64/arduino-cli
 
       - name: Install libraries
-        run: if [[ "$REQUIRED_LIBRARIES" != "" ]]; then arduino-cli lib install "$REQUIRED_LIBRARIES" ; fi
-             
+        run: if [[ "$REQUIRED_LIBRARIES" != "" ]]; then arduino-cli lib install ${{ env.REQUIRED_LIBRARIES }}; fi
+
       # Finally, we compile the sketch, using the FQBN that was set in the build matrix.
       - name: Compile all examples
+        env:
+          BUILD_PROPERTIES: ${{ toJson(matrix.examples-build-properties) }}
         run: |
-          if [ "${{ matrix.examples-include }}" == "" ]; then
-            echo -e "Compiling ALL examples for board ${{ matrix.arduino-boards-fqbn }} \n"
-            examples=($(find . -name "*.ino"))
-            for example in "${examples[@]}"; do # Loop over all example directories
-              example_name=$(basename $(dirname $example))
-              if [[ "${{ matrix.examples-exclude }}" == *"$example_name"* ]]; then
-                echo -e "Skipping $example_name \xe2\x9e\x9e" # Right arrow
+          BUILD_PROPERTIES=${BUILD_PROPERTIES#\{} # remove "{"
+          # if matrix.examples-build-properties are specified, create an associative shell array
+          if [[ $BUILD_PROPERTIES != "null" ]]; then declare -A PROP_MAP="( $(echo $BUILD_PROPERTIES | sed -E 's/"(\w*)": *([^,}]*)[,}]/\[\1\]=\2/g' ) )"; fi
+          echo -e "Compiling examples for board ${{ matrix.arduino-boards-fqbn }} \n"
+          EXAMPLES=($(find . -name "*.ino"))
+          for example in "${EXAMPLES[@]}"; do # Loop over all example directories
+            EXAMPLE_NAME=$(basename $(dirname $example))
+            if [[ "${{ matrix.examples-exclude }}" == *"$EXAMPLE_NAME"* ]]; then
+              echo -e "Skipping $EXAMPLE_NAME \xe2\x9e\x9e" # Right arrow
+            else
+              # check if there is an entry in the associative array and create a compile parameter
+              echo -n "Compiling $EXAMPLE_NAME "
+              if [[ "${PROP_MAP[$EXAMPLE_NAME]}" != "" ]]; then echo -n "with ${PROP_MAP[$EXAMPLE_NAME]} "; fi
+              build_stdout=$(arduino-cli compile --verbose --warnings all --fqbn ${{ matrix.arduino-boards-fqbn }} --build-properties compiler.cpp.extra_flags="${PROP_MAP[$EXAMPLE_NAME]}" $(dirname $example) 2>&1);
+              if [ $? -ne 0 ]; then
+                echo -e ""$RED"\xe2\x9c\x96" # If ok output a green checkmark else a red X and the command output.
+                exit_code=1
+                echo -e "$build_stdout \n"
               else
-                echo -n "Compiling $example_name "
-                build_stdout=$(arduino-cli compile --verbose --warnings all --fqbn ${{ matrix.arduino-boards-fqbn }} $(dirname $example) 2>&1);
-                if [ $? -ne 0 ]; then 
-                  echo -e ""$RED"\xe2\x9c\x96" # If ok output a green checkmark else a red X and the command output.
-                  exit_code=1
-                  echo -e "$build_stdout \n"
-                else 
-                  echo -e ""$GREEN"\xe2\x9c\x93"
-                fi 
+                echo -e ""$GREEN"\xe2\x9c\x93"
               fi
-            done
-          fi
+            fi
+          done
           exit $exit_code
         shell: bash {0} # Needed to avoid an exit at first error
-        
-      ##########################################################
-      # THIS DOES NOT YET WORK  
-      #- name: Cache Arduino packages
-      # does not work, since the cache does not contain all installed platforms :-(
-      # And we can not build separate caches for each platform 
-      #  id: arduino15-packages-env.MATRIX_PLATFORM <- This is a syntax error and this too: arduino15-packages-${{ matrix.platform }}
-      #  uses: actions/cache@v1 # using version 1
-      #  with:
-      #    path: $HOME/.arduino15/packages/
-      #    key: arduino15-packages-env.MATRIX_PLATFORM
+
