@@ -86,7 +86,7 @@ void loop() {
     /*
      * Button 1
      */
-    Button1AtPin3.updateButtonState(); // this is ONLY needed if we expect a regular button press which is shorter than BUTTON_DEBOUNCING_MILLIS!
+    Button1AtPin3.updateButtonState(); // this is ONLY required if we expect a regular button press which is shorter than BUTTON_DEBOUNCING_MILLIS!
     if (Button1AtPin3.ButtonStateHasJustChanged) {
         Button1AtPin3.ButtonStateHasJustChanged = false; // Acknowledge button state change flag
 
