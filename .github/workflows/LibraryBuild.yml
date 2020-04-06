@@ -39,12 +39,13 @@ jobs:
         #############################################################################################################
         include:
           - arduino-boards-fqbn: digistump:avr:digispark-tiny1  # ATtiny85 board @1 MHz
-            platform-url: http://digistump.com/package_digistump_index.json
-            # examples-build-properties / aka setting compiler.cpp.extra_flags does not work for digistump:avr platform
-            examples-exclude: EasyButtonExample # Comma separated list of (unique substrings of) example names to exclude in build
-
+            platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json
+            examples-build-properties:
+              EasyButtonExample:
+                -DTX_PIN=PB0
+                
           - arduino-boards-fqbn: digistump:avr:digispark-pro
-            platform-url: http://digistump.com/package_digistump_index.json
+            platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json
 
           - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal
             platform-url: http://drazzy.com/package_drazzy.com_index.json
