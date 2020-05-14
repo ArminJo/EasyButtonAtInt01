@@ -28,7 +28,9 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define MEASURE_INTERRUPT_TIMING
+//#define DO_NOT_REQUIRE_LONG_AND_DOUBLE_PRESS
 
+#define ANALYZE_MAX_BOUNCING_PERIOD
 #define BUTTON_DEBOUNCING_MILLIS 2
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0

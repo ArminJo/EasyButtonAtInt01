@@ -1,7 +1,8 @@
 /*
  *  EasyButtonExample.cpp
  *
- *  Example for one or two buttons using PA7/PCINT0 for button 1 on an ATtiny167 and PB3//PCINT for button 1 on an ATtiny*5
+ *  Example for one or two buttons
+ *  Button1 using PCINT0 - PA7 on an ATtiny167 and
  *
  *  Copyright (C) 2018  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
@@ -26,50 +27,52 @@
 #include <Arduino.h>
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
-//#define BUTTON_DEBOUNCING_MILLIS 80
+//#define BUTTON_DEBOUNCING_MILLIS 80 // With this you can adapt to the characteristic of your button. Default is 50.
+#define ANALYZE_MAX_BOUNCING_PERIOD
 
-#define USE_BUTTON_0  // Enable code for 1. button at INT0
-//#define USE_BUTTON_1  // Enable code for 2. button at INT1 or PCINT[0:7]
+#define USE_BUTTON_0  // Enable code for button 0 at INT0.
+#define USE_BUTTON_1  // Enable code for button 1 at INT1 or PCINT[0:7]
+
+// definitions for ATtinies
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.h"
-#include "ATtinyUtils.h" // for changeDigisparkClock()
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) && TX_PIN == PB2
+
+#  if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) && TX_PIN == PB2
 #error "Please change TX_PIN in ATtinySerialOut.h from PB2 to e.g. PB0 for use with this example"
-#endif
+#  endif
+
 #  if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
+#define INT1_PIN 1 // use PB2 for button 1
+
 #  elif defined(ARDUINO_AVR_DIGISPARKPRO)
 #undef LED_BUILTIN    // In case we use another core e.g. in Eclipse
 #define LED_BUILTIN 9 // On a Digispark Pro we have PB1 / D9 / PCB pin 1
+
 #define INT1_PIN 7   // use PCINT7/PA7 instead of INT1/PA3 for button 1 on ATtiny167
-#define INTENTIONALLY_USE_PCI0_FOR_BUTTON1  // yes we know that we use the PCINT[0:7] for button 1. It is no typo.
+//#define INTENTIONALLY_USE_PCI0_FOR_BUTTON1  // yes we know that we use the PCINT[0:7] for button 1. It is no typo.
+
 #  else
 #undef LED_BUILTIN
 #define LED_BUILTIN PB1 // define pin of built in LED for your ATtiny
-#  endif
-#endif
+#  endif // ATTiny type
+#endif // ATTinies
 
 #include "EasyButtonAtInt01.cpp.h"
 
-EasyButton Button1AtPin3(true);  // true  -> button is connected to INT0
-#ifdef USE_BUTTON_1
-bool sButtonLongPressDetected = false;
-// The callback function for button 2
+// The callback function for button 1
 void printButtonToggleState(bool aButtonToggleState);
-EasyButton Button2AtPA7(false, &printButtonToggleState); // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]
-#endif
 
-#define VERSION_EXAMPLE "2.0"
+EasyButton Button0AtPin2(true, &printButtonToggleState); // true  -> button is connected to INT0
+EasyButton Button1AtPin3((bool)false);  // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]. (bool) to avoid overloaded warning for digispark compiler.
+
+#define VERSION_EXAMPLE "2.1"
 
 long sOldDeltaMillis;
 
 void setup() {
 // initialize the digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
-
-#if defined(ARDUINO_AVR_DIGISPARK) || defined(ARDUINO_AVR_DIGISPARKPRO)
-    changeDigisparkClock();
-#endif
 
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__)
@@ -84,7 +87,8 @@ void setup() {
 void loop() {
 
     /*
-     * Button 1
+     * Button 1 - check manually.
+     * But it is easier to just use a callback function as we do for button 0
      */
     Button1AtPin3.updateButtonState(); // this is ONLY required if we expect a regular button press which is shorter than BUTTON_DEBOUNCING_MILLIS!
     if (Button1AtPin3.ButtonStateHasJustChanged) {
@@ -95,7 +99,7 @@ void loop() {
         /*
          * Print new status
          */
-        Serial.print(F("Button1 IsActive="));
+        Serial.print(F("Button 1 IsActive="));
         Serial.print(Button1AtPin3.ButtonStateIsActive);
         Serial.print(F(" ToggleState="));
         Serial.print(Button1AtPin3.ButtonToggleState);
@@ -104,39 +108,51 @@ void loop() {
             Serial.print(Button1AtPin3.ButtonPressDurationMillis);
             Serial.print(F(" ms"));
         }
+
+#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
+        /*
+         * Print max bouncing period for the button
+         */
         if (Button1AtPin3.MaxBouncingPeriodMillisHasJustChanged) {
             Button1AtPin3.MaxBouncingPeriodMillisHasJustChanged = false;
             Serial.print(F(" MaxBouncingPeriod="));
             Serial.print(Button1AtPin3.MaxBouncingPeriodMillis);
         }
+#endif
         Serial.println();
     }
 
-#ifdef USE_BUTTON_1
     /*
-     * Button 2 uses a callback function
-     *
-     * Long press (> 500 ms) detection by polling function checkForLongPress()
+     * Long press (> 400 ms) detection function for button 0 can be called in loop
      */
-    if (!sButtonLongPressDetected && Button2AtPA7.checkForLongPress(500) == EASY_BUTTON_LONG_PRESS_DETECTED) {
-        sButtonLongPressDetected = true;
-        Serial.println(F("Button2 long press (> 500 ms) detected"));
+    if (Button0AtPin2.checkForLongPressBlocking()) {
+        Serial.println(F("Button 0 long press (> 400 ms) detected"));
     }
-#endif
 }
 
-#ifdef USE_BUTTON_1
 void printButtonToggleState(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
 
-    Serial.print("Button2 ToggleState=");
+    Serial.print("Button 0 ToggleState=");
     Serial.print(aButtonToggleState);
-    sButtonLongPressDetected = false;
-    if (Button2AtPA7.MaxBouncingPeriodMillisHasJustChanged) {
-        Button2AtPA7.MaxBouncingPeriodMillisHasJustChanged = false;
+
+#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
+    /*
+     * Print max bouncing period for the button
+     */
+    if (Button0AtPin2.MaxBouncingPeriodMillisHasJustChanged) {
+        Button0AtPin2.MaxBouncingPeriodMillisHasJustChanged = false;
         Serial.print(F(" MaxBouncingPeriod="));
-        Serial.print(Button2AtPA7.MaxBouncingPeriodMillis);
+        Serial.print(Button0AtPin2.MaxBouncingPeriodMillis);
     }
-    Serial.println();
-}
 #endif
+    Serial.println();
+
+    /*
+     * This function works reliable only if called in callback function
+     */
+    if (Button0AtPin2.checkForDoublePress()) {
+        Serial.println(F("Button 0 double press (< 400 ms) detected"));
+    }
+}
+

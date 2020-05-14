@@ -32,6 +32,10 @@
  */
 
 /*
+ * Version 2.1.0 - 5/2020
+ * - Avoid 1 ms delay for checkForLongPressBlocking() if button is not pressed.
+ * - Only one true result per press for checkForLongPressBlocking().
+ *
  * Version 2.0.0 - 1/2020
  * - Ported to ATtinyX5 and ATiny167.
  * - Support also PinChangeInterrupt for button 1 on Pin PA0 to PA7 for ATtiniy87/167.
@@ -57,7 +61,12 @@
  * ...
  *
  */
-
+/*
+ * Define USE_ATTACH_INTERRUPT to force use of the arduino function attachInterrupt().
+ * Needed if you get the error " multiple definition of `__vector_1'" (or `__vector_2'), because another library uses the attachInterrupt() function.
+ * For one button it needs additional 160 bytes FLASH, for 2 buttons it needs additional 88 bytes.
+ */
+//#define USE_ATTACH_INTERRUPT
 /*
  * You can define your own value if you have buttons which are worse or better than the one I have.
  * Since debouncing is not done with blocking wait, reducing this value makes not much sense, except you expect regular short button presses,
@@ -67,29 +76,23 @@
  * Test your own new value with the DebounceTest example
  *
  * Analyze the current button debounce value with defining ANALYZE_MAX_BOUNCING_PERIOD and looking at MaxBouncingPeriodMillis.
+ * Defining ANALYZE_MAX_BOUNCING_PERIOD computes the maximum bouncing period.
+ * this is the time between first level change and last bouncing level change during BUTTON_DEBOUNCING_MILLIS
  */
+//#define ANALYZE_MAX_BOUNCING_PERIOD
 #ifndef BUTTON_DEBOUNCING_MILLIS
 #define BUTTON_DEBOUNCING_MILLIS 50 // 35 millis measured for my button :-).
 #endif
 
-/*
- * Define USE_ATTACH_INTERRUPT to force use of the arduino function attachInterrupt().
- * Needed if you get the error " multiple definition of `__vector_1'" (or `__vector_2'), because another library uses the attachInterrupt() function.
- * For one button it needs additional 160 bytes FLASH, for 2 buttons it needs additional 88 bytes.
- */
-//#define USE_ATTACH_INTERRUPT
-//
-/*
- * Defining ANALYZE_MAX_BOUNCING_PERIOD computes the maximum bouncing period.
- * this is the time between first level change and last bouncing level change during BUTTON_DEBOUNCING_MILLIS
- */
-#define ANALYZE_MAX_BOUNCING_PERIOD
 /*
  * Return values for checkForLongPress()
  */
 #define EASY_BUTTON_LONG_PRESS_STILL_POSSIBLE 0
 #define EASY_BUTTON_LONG_PRESS_ABORT 1 // button was released, no long press detection possible
 #define EASY_BUTTON_LONG_PRESS_DETECTED 2
+
+#define EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS 400
+#define EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS 400
 
 /*
  * Activate LED_BUILTIN as long as button is pressed
@@ -204,7 +207,6 @@
 #define INT0_BIT INT0_PIN
 #endif
 
-
 class EasyButton {
 
 public:
@@ -228,36 +230,40 @@ public:
      * Updates the ButtonPressDurationMillis by polling, since this cannot be done by interrupt.
      */
     uint16_t updateButtonPressDuration();
-    uint8_t checkForLongPress(uint16_t aLongPressThresholdMillis);
-    bool checkForLongPressBlocking(uint16_t aLongPressThresholdMillis);
-    bool checkForDoublePress(uint16_t aDoublePressDelayMillis);
+    uint8_t checkForLongPress(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
+    bool checkForLongPressBlocking(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
+    bool checkForDoublePress(uint16_t aDoublePressDelayMillis = EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS); // !!!Works only reliable if called in callback function!!!
     bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
+
     void handleINT01Interrupts();
 
+    bool LastChangeWasBouncingToInactive; // Internal state, reflects actual reading with spikes and bouncing. Negative logic: true / active means button pin is LOW
+    volatile bool ButtonStateIsActive; // Negative logic: true / active means button pin is LOW. If last press duration < BUTTON_DEBOUNCING_MILLIS it holds wrong value (true instead of false) :-(
+    volatile bool ButtonToggleState;      // Toggle is on press, not on release - initial value is false
 
-    bool LastChangeWasBouncingToInactive;   // Internal state, reflects actual reading with spikes and bouncing. Negative logic: true / active means button pin is LOW
-    volatile bool ButtonStateIsActive;      // negative logic: true / active means button pin is LOW. If last press duration < BUTTON_DEBOUNCING_MILLIS it holds wrong value (true instead of false) :-(
-    volatile bool ButtonToggleState;        // Toggle is on press, not on release - initial value is false
     /*
      * Flag to enable action only once. Only set to true by library. Can be checked and set to false my main program to enable only one action per button press
      */
     volatile bool ButtonStateHasJustChanged;
+
     /*
      *  Duration of active state. Is is set at button release. Can in theory not be less than BUTTON_DEBOUNCING_MILLIS.
      *  By definition, shorter presses are recognized as bouncing.
      *  To cover this case you can call updateButtonState() from an outside loop which updates the button state in this case.
      */
     volatile uint16_t ButtonPressDurationMillis;
-    volatile unsigned long ButtonLastChangeMillis;        // for debouncing and long press detection
-    volatile unsigned long ButtonReleaseMillis;           // for double press recognition
+    volatile unsigned long ButtonLastChangeMillis;        // For debouncing
 
-#ifdef ANALYZE_MAX_BOUNCING_PERIOD
+    volatile unsigned long ButtonReleaseMillis;           // for double press recognition
+    volatile bool ButtonLongPressJustDetected;            // Lock flag for long button press detection
+
+#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
     volatile unsigned int MaxBouncingPeriodMillis = 0; // Maximum bouncing period. Time between first level change and last bouncing level change during BUTTON_DEBOUNCING_MILLIS
     volatile bool MaxBouncingPeriodMillisHasJustChanged;
 #endif
 
     volatile bool isButtonAtINT0;
-    void (*ButtonPressCallback)(bool aButtonToggleState) = NULL; // if not null, is called on every button press with ButtonToggleState as parameter
+    void (*ButtonPressCallback)(bool aButtonToggleState) = NULL; // If not null, is called on every button press with ButtonToggleState as parameter
 
 #if defined(USE_BUTTON_0)
     static EasyButton * sPointerToButton0ForISR;
@@ -268,10 +274,8 @@ public:
 };
 // end of class definition
 
-
 void handleINT0Interrupt();
 void handleINT1Interrupt();
-
 
 /*
  * This functions are weak and can be replaced by your own code

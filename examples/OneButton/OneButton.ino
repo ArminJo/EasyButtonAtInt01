@@ -27,7 +27,9 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
-#define USE_BUTTON_0  // Enable code for 1. button at INT0
+#define USE_BUTTON_0  // Enable code for 1. button at INT0 / D2
+#define DO_NOT_REQUIRE_LONG_AND_DOUBLE_PRESS
+
 #include "EasyButtonAtInt01.cpp.h"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
@@ -57,6 +59,10 @@ void setup() {
 
 void loop() {
     delay(10);
+    /*
+     * Manually check button state change
+     * Using a callback function is sometimes easier, see EasyButtonExample and Callback example.
+     */
     if (Button0AtPin2.ButtonStateHasJustChanged) {
         // reset flag in order to do call digitalWrite() only once per button press
         Button0AtPin2.ButtonStateHasJustChanged = false;

@@ -33,7 +33,7 @@
 void showButtonToggleState(bool aButtonToggleState);    // The callback function
 EasyButton Button0AtPin2(&showButtonToggleState);       // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0 (pin2)
 
-#define VERSION_EXAMPLE "2.0"
+#define VERSION_EXAMPLE "2.1"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
@@ -69,7 +69,7 @@ void showButtonToggleState(bool aButtonToggleState) {
     /*
      * Double press (< 200 ms) detection by calling checkForForDoublePress() once at button press time.
      */
-    if (Button0AtPin2.checkForDoublePress(200)) {
-        Serial.println(F("Double press (< 200 ms) detected"));
+    if (Button0AtPin2.checkForDoublePress(300)) {
+        Serial.println(F("Double press (< 300 ms) detected"));
     }
 }
