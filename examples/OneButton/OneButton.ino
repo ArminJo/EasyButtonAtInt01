@@ -28,7 +28,6 @@
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0 / D2
-#define DO_NOT_REQUIRE_LONG_AND_DOUBLE_PRESS
 
 #include "EasyButtonAtInt01.cpp.h"
 
@@ -55,6 +54,7 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
+    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
 }
 
 void loop() {

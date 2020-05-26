@@ -28,7 +28,7 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define BUTTON_DEBOUNCING_MILLIS 80 // With this you can adapt to the characteristic of your button. Default is 50.
-#define ANALYZE_MAX_BOUNCING_PERIOD
+//#define ANALYZE_MAX_BOUNCING_PERIOD //  Analyze the button actual debounce value
 
 #define USE_BUTTON_0  // Enable code for button 0 at INT0.
 #define USE_BUTTON_1  // Enable code for button 1 at INT1 or PCINT[0:7]
@@ -61,12 +61,11 @@
 #include "EasyButtonAtInt01.cpp.h"
 
 // The callback function for button 1
-void printButtonToggleState(bool aButtonToggleState);
+void handleButtonPress(bool aButtonToggleState);
+EasyButton Button0AtPin2(true, &handleButtonPress); // true  -> button is connected to INT0
+EasyButton Button1AtPin3((bool) false); // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]. (bool) to avoid overloaded warning for digispark compiler.
 
-EasyButton Button0AtPin2(true, &printButtonToggleState); // true  -> button is connected to INT0
-EasyButton Button1AtPin3((bool)false);  // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]. (bool) to avoid overloaded warning for digispark compiler.
-
-#define VERSION_EXAMPLE "2.1"
+#define VERSION_EXAMPLE "3.0"
 
 long sOldDeltaMillis;
 
@@ -81,7 +80,7 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-
+    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
 }
 
 void loop() {
@@ -108,51 +107,20 @@ void loop() {
             Serial.print(Button1AtPin3.ButtonPressDurationMillis);
             Serial.print(F(" ms"));
         }
-
-#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
-        /*
-         * Print max bouncing period for the button
-         */
-        if (Button1AtPin3.MaxBouncingPeriodMillisHasJustChanged) {
-            Button1AtPin3.MaxBouncingPeriodMillisHasJustChanged = false;
-            Serial.print(F(" MaxBouncingPeriod="));
-            Serial.print(Button1AtPin3.MaxBouncingPeriodMillis);
-        }
-#endif
         Serial.println();
-    }
-
-    /*
-     * Long press (> 400 ms) detection function for button 0 can be called in loop
-     */
-    if (Button0AtPin2.checkForLongPressBlocking()) {
-        Serial.println(F("Button 0 long press (> 400 ms) detected"));
     }
 }
 
-void printButtonToggleState(bool aButtonToggleState) {
-    digitalWrite(LED_BUILTIN, aButtonToggleState);
-
-    Serial.print("Button 0 ToggleState=");
-    Serial.print(aButtonToggleState);
-
-#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
+void handleButtonPress(bool aButtonToggleState) {
     /*
-     * Print max bouncing period for the button
-     */
-    if (Button0AtPin2.MaxBouncingPeriodMillisHasJustChanged) {
-        Button0AtPin2.MaxBouncingPeriodMillisHasJustChanged = false;
-        Serial.print(F(" MaxBouncingPeriod="));
-        Serial.print(Button0AtPin2.MaxBouncingPeriodMillis);
-    }
-#endif
-    Serial.println();
-
-    /*
-     * This function works reliable only if called in callback function
+     * This function works reliable only if called early in press callback function
      */
     if (Button0AtPin2.checkForDoublePress()) {
         Serial.println(F("Button 0 double press (< 400 ms) detected"));
     }
-}
 
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
+
+    Serial.print("Button 0 ToggleState=");
+    Serial.println(aButtonToggleState);
+}

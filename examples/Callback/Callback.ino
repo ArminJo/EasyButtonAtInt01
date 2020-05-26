@@ -30,10 +30,11 @@
 #define USE_BUTTON_0  // Enable code for 1. button at INT0 (pin2)
 #include "EasyButtonAtInt01.cpp.h"
 
-void showButtonToggleState(bool aButtonToggleState);    // The callback function
-EasyButton Button0AtPin2(&showButtonToggleState);       // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0 (pin2)
+void handleButtonPress(bool aButtonToggleState);    // The button press callback function
+void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
+EasyButton Button0AtPin2(true, &handleButtonPress, &handleButtonRelease); // true -> button is connected to INT0 (pin2)
 
-#define VERSION_EXAMPLE "2.1"
+#define VERSION_EXAMPLE "3.0"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
@@ -43,6 +44,8 @@ EasyButton Button0AtPin2(&showButtonToggleState);       // Only 1. button (USE_B
 #elif ! defined(LED_BUILTIN)
 #define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
+#define BLINK_SHORT_MILLIS 200
+#define BLINK_LONG_MILLIS 600
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -54,22 +57,57 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
+    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
 }
 
 void loop() {
     delay(10);
 }
 
+void blinkLEDBlocking(uint8_t aLedPin, uint16_t aDelay, uint8_t aRepetitions) {
+    for (uint8_t i = 0; i < aRepetitions; ++i) {
+        digitalWrite(aLedPin, HIGH);
+        delay(aDelay);
+        digitalWrite(aLedPin, LOW);
+        delay(aDelay);
+    }
+}
+
 /*
  * The callback function is called at each button press
  * Initial value is false, so first call is with true
  */
-void showButtonToggleState(bool aButtonToggleState) {
-    digitalWrite(LED_BUILTIN, aButtonToggleState);
+void handleButtonPress(bool aButtonToggleState) {
     /*
      * Double press (< 200 ms) detection by calling checkForForDoublePress() once at button press time.
      */
     if (Button0AtPin2.checkForDoublePress(300)) {
-        Serial.println(F("Double press (< 300 ms) detected"));
+        Serial.print(F("Double press "));
+        Serial.print(Button0AtPin2.ButtonLastChangeMillis - Button0AtPin2.ButtonReleaseMillis);
+        Serial.println(F(" ms detected"));
+
+        // let the led blink twice short
+        blinkLEDBlocking(LED_BUILTIN, BLINK_SHORT_MILLIS, 2);
+        Button0AtPin2.ButtonToggleState = false;
+    }
+    Serial.println(F("Button pressed"));
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
+}
+
+void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
+    Serial.println(F("Button released"));
+
+    /*
+     * Simple long press (> 400 ms) detection
+     */
+    if (aButtonPressDurationMillis >= EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS) {
+        Serial.print(F("Long press "));
+        Serial.print(aButtonPressDurationMillis);
+        Serial.println(F(" ms detected"));
+
+        // let the led blink long
+        blinkLEDBlocking(LED_BUILTIN, BLINK_LONG_MILLIS, 2);
+        Button0AtPin2.ButtonToggleState = false;
     }
 }

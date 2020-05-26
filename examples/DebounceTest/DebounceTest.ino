@@ -28,7 +28,6 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define MEASURE_INTERRUPT_TIMING
-//#define DO_NOT_REQUIRE_LONG_AND_DOUBLE_PRESS
 
 #define ANALYZE_MAX_BOUNCING_PERIOD
 #define BUTTON_DEBOUNCING_MILLIS 2
@@ -38,7 +37,7 @@
 
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#define VERSION_EXAMPLE "2.0"
+#define VERSION_EXAMPLE "3.0"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
@@ -62,7 +61,9 @@ void setup() {
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
+    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
     Serial.println(F("Button debouncing time is reduced to " STR(BUTTON_DEBOUNCING_MILLIS) " ms"));
+    Serial.println(F("Please press the button and watch for \"Bouncing, MBP=...\" output at the Serial Monitor"));
 }
 
 void loop() {

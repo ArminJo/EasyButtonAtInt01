@@ -1,7 +1,7 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
 Available as Arduino library "EasyButtonAtInt01"
 
-### [Version 2.1.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
+### [Version 3.0.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -16,8 +16,9 @@ Debouncing is merely done by ignoring a button change within the debouncing time
 So **button state is instantly available** without debouncing delay!
 - Each button press toggles a state variable, so **no external logic for implementing a toggle button is needed**.
 - Support for **double press detection** is included. See EasyButtonExample and Callback example.
-- Support for **long press detection**, is included. See EasyButtonExample example.
-- Support to **measure maximum bouncing period of a button**. See EasyButtonExample example.
+- Support for **long press detection**, is included. See Callback example.
+- Support to **measure maximum bouncing period of a button**. See DebounceTest example.
+- Support for **active high buttons**.
 
 ## Table of available pins for the 2 buttons
 | CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined !=3 |
@@ -64,59 +65,68 @@ void loop() {
 }
 ```
 
-## Usage of callback function
-The callback function is is called on every button press with ButtonToggleState as parameter.<br/>
+## Usage of callback functions
+The button press callback function is is called on every button press with ButtonToggleState as parameter.<br/>
 **The value at the first call (after first press) is true**.<br/>
-The callback function runs in an interrupt service context, which means it should be as short as possible. 
-But before callback function is called, interrupts are enabled.
-This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in the callback function**.
+The button release callback function is called on every button release with the additional parameter ButtonPressDurationMillis.<br/>
+Both callback functions run in an interrupt service context, which means they should be as short as possible. 
+But before a callback function is called, interrupts are enabled.
+This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.cpp.h"
 
-// initial value is false, so first call is with true
-void printButtonToggleState(bool aButtonToggleState) {
+// Initial value is false, so first call is with true
+void handleButtonPress(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
 }
-EasyButton Button0AtPin2(&printButtonToggleState);
+EasyButton Button0AtPin2(&handleButtonPress);
 
 void setup() {}
 void loop() {}
 ```
 
 ## Long press detection
-Check it cyclical in your loop. Do not forget, that you will get a callback (if enabled) at the start of the long press.
-The blocking call only blocks if button is pressed, otherwise it returns immediately.
-
-```
-void loop() {
-...
-    // default long press period is 400 ms
-    if (Button1AtPin3.checkForLongPressBlocking()) {
-        doSomething();
-    }
-...
-}
-```
-
-## Double press detection
-Call checkForDoublePress() only from callback function. It will not work as expected called outside the callback function.
+the easiest way is to check it in the button release handler. Do not forget, that you will get a press callback (if enabled) at the start of the long press.
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.cpp.h"
 
-void printButtonToggleState(bool aButtonToggleState);
+void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
+EasyButton Button0AtPin2(true, NULL, &handleButtonRelease); // true -> button is connected to INT0 (pin2)
+
+handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {
+    if (aButtonPressDurationMillis >= EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS) { // 400 ms
+        Serial.print(F("Long press "));
+        Serial.print(aButtonPressDurationMillis);
+        Serial.println(F(" ms detected"));
+    }
+}
+
+void setup() {}
+void loop() {}
+}
+```
+
+## Double press detection
+Call checkForDoublePress() only from button press callback function. It will not work as expected called outside this callback function.
+
+```
+#define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
+#include "EasyButtonAtInt01.cpp.h"
+
+void handleButtonPress(bool aButtonToggleState);
 EasyButton Button0AtPin2(&printButtonToggleState);
 
-// initial value is false, so first call is with true
-void printButtonToggleState(bool aButtonToggleState) {
-    digitalWrite(LED_BUILTIN, aButtonToggleState);
-     // This function works reliable only if called in callback function
+// Initial value is false, so first call is with true
+void handleButtonPress(bool aButtonToggleState) {
+     // This function works reliable only if called early in callback function
     if (Button0AtPin2.checkForDoublePress()) {
         Serial.println(F("Button 0 double press (< 400 ms) detected"));
     }
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
 }
 
 void setup() {}
@@ -134,7 +144,8 @@ If you are using Sloeber as your IDE, you can easily define global symbols at *P
 ## Class methods
 ```
 EasyButton(bool aIsButtonAtINT0); // Constructor
-EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState)); // Constructor
+EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState));
+EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState), void (*aButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis));
 void init(); // used by constructors
 
 #define EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS 400
@@ -150,13 +161,19 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
+###  Version 3.0.0
+- Added button release handler and adapted examples.
+- Revoke change for "only one true result per press for checkForLongPressBlocking()". It is superseded by button release handler.
+- Support buttons which are active high by defining `BUTTON_IS_ACTIVE_HIGH`.
+- Improved detection of maximum bouncing period used in DebounceTest.
+
 ###  Version 2.1.0
 - Avoid 1 ms delay for `checkForLongPressBlocking()` if button is not pressed.
 - Only one true result per press for `checkForLongPressBlocking()`.
 
 ### Version 2.0.0
 - Ported to ATtinyX5 and ATiny167.
-- Support also PinChangeInterrupt for button 1 on Pin PA0 to PA7 for ATtiniy87/167.
+- Support also PinChangeInterrupt for button 1 on Pin PA0 to PA7 for ATtiny87/167.
 - Long button press detection support.
 - Analyzes maximum debouncing period.
 - Double button press detection support.
