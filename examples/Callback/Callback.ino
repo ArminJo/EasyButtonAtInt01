@@ -32,9 +32,7 @@
 
 void handleButtonPress(bool aButtonToggleState);    // The button press callback function
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
-EasyButton Button0AtPin2(true, &handleButtonPress, &handleButtonRelease); // true -> button is connected to INT0 (pin2)
-
-#define VERSION_EXAMPLE "3.0"
+EasyButton Button0AtPin2(&handleButtonPress, &handleButtonRelease); // Button is connected to INT0 (pin2)
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
@@ -56,8 +54,7 @@ void setup() {
         ; //delay for Leonardo
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
+    Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
 }
 
 void loop() {

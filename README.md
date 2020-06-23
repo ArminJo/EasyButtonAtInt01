@@ -1,7 +1,7 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
 Available as Arduino library "EasyButtonAtInt01"
 
-### [Version 3.0.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
+### [Version 3.1.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -9,16 +9,17 @@ Available as Arduino library "EasyButtonAtInt01"
 [![Build Status](https://github.com/ArminJo/EasyButtonAtInt01/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/EasyButtonAtInt01/actions)
 [![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2FEasyButtonAtInt01)](https://github.com/brentvollebregt/hit-counter)
 
-Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.<br/>
+Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.<br/>
 - No external pullup, **no polling needed**.
 - The library is totally **based on interrupt** and **debouncing is implemented in a not blocking way**. 
 Debouncing is merely done by ignoring a button change within the debouncing time (default 50 ms).
 So **button state is instantly available** without debouncing delay!
 - Each button press toggles a state variable, so **no external logic for implementing a toggle button is needed**.
-- Support for **double press detection** is included. See EasyButtonExample and Callback example.
-- Support for **long press detection**, is included. See Callback example.
-- Support to **measure maximum bouncing period of a button**. See DebounceTest example.
+- Support for **double press detection** is included. See [EasyButtonExample](examples/EasyButtonExample/EasyButtonExample.ino#L112) and [Callback example](examples/Callback/Callback.ino#L78).
+- Support for **long press detection**, is included. See [Callback example](examples/Callback/Callback.ino#L98).
 - Support for **active high buttons**.
+- Small memory footprint.
+- Support to **measure maximum bouncing period of a button**. See [DebounceTest example](examples/DebounceTest/DebounceTest.ino#L64).
 
 ## Table of available pins for the 2 buttons
 | CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined !=3 |
@@ -49,10 +50,10 @@ To use 2 buttons, it needs only:
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
-#define USE_BUTTON_1 // Enable code for button at INT1 (pin3)
+#define USE_BUTTON_1 // Enable code for button at INT1 (pin3) or PCINT[0:7]
 #include "EasyButtonAtInt01.cpp.h"
-EasyButton Button0AtPin2(true);  // true  -> Button is connected to INT0 (pin2)
-EasyButton Button1AtPin3(false); // false -> Button is not connected to INT0 => connected to INT1 (pin3)
+EasyButton Button0AtPin2();  // no parameter -> Button is connected to INT0 (pin2)
+EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT); // Button is connected to INT1 (pin3)
 
 void setup() {}
 void loop() {
@@ -81,21 +82,21 @@ This allows the timer interrupt for millis() to work and therfore **delay() and 
 void handleButtonPress(bool aButtonToggleState) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
 }
-EasyButton Button0AtPin2(&handleButtonPress);
+EasyButton Button0AtPin2(&handleButtonPress); // Button is connected to INT0 (pin2)
 
 void setup() {}
 void loop() {}
 ```
 
 ## Long press detection
-the easiest way is to check it in the button release handler. Do not forget, that you will get a press callback (if enabled) at the start of the long press.
+The easiest way is to check it in the button release handler. Do not forget, that you will get a press callback (if enabled) at the start of the long press.
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.cpp.h"
 
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
-EasyButton Button0AtPin2(true, NULL, &handleButtonRelease); // true -> button is connected to INT0 (pin2)
+EasyButton Button0AtPin2(NULL, &handleButtonRelease); // Button is connected to INT0 (pin2)
 
 handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {
     if (aButtonPressDurationMillis >= EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS) { // 400 ms
@@ -143,6 +144,9 @@ If you are using Sloeber as your IDE, you can easily define global symbols at *P
 
 ## Class methods
 ```
+EasyButton(); // Constructor for button at INT0
+EasyButton(void (*aButtonPressCallback)(bool aButtonToggleState)); // Constructor for button at INT0
+
 EasyButton(bool aIsButtonAtINT0); // Constructor
 EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState));
 EasyButton(bool aIsButtonAtINT0, void (*aButtonPressCallback)(bool aButtonToggleState), void (*aButtonReleaseCallback)(bool aButtonToggleState, uint16_t aButtonPressDurationMillis));
@@ -161,6 +165,10 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
+###  Version 3.1.0
+- 2 sets of constructors, one for only one button used and one for the second button if two buttons used.
+- Map pin numbers for Digispark pro boards, for use with with digispark library.
+
 ###  Version 3.0.0
 - Added button release handler and adapted examples.
 - Revoke change for "only one true result per press for checkForLongPressBlocking()". It is superseded by button release handler.

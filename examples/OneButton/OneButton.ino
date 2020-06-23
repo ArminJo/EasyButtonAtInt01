@@ -42,8 +42,6 @@
 
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#define VERSION_EXAMPLE "2.0"
-
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
@@ -53,8 +51,7 @@ void setup() {
         ; //delay for Leonardo
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
+    Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
 }
 
 void loop() {

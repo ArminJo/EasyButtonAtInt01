@@ -62,10 +62,8 @@
 
 // The callback function for button 1
 void handleButtonPress(bool aButtonToggleState);
-EasyButton Button0AtPin2(true, &handleButtonPress); // true  -> button is connected to INT0
-EasyButton Button1AtPin3((bool) false); // false -> button is not connected to INT0 but connected to INT1 or PCINT[0:7]. (bool) to avoid overloaded warning for digispark compiler.
-
-#define VERSION_EXAMPLE "3.0"
+EasyButton Button0AtPin2(&handleButtonPress);       // Only callback parameter -> button is connected to INT0
+EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT);  // Button is connected to INT1 or PCINT[0:7]
 
 long sOldDeltaMillis;
 
@@ -79,8 +77,7 @@ void setup() {
         ; //delay for Leonardo
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
+    Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
 }
 
 void loop() {

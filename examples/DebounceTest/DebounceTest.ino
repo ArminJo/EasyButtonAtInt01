@@ -37,8 +37,6 @@
 
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#define VERSION_EXAMPLE "3.0"
-
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
 #elif defined(ARDUINO_AVR_DIGISPARKPRO)
@@ -60,8 +58,8 @@ void setup() {
     ; //delay for Leonardo
 #endif
     // Just to know which program is running on my Arduino
-    Serial.println(F("START " __FILE__ "\r\nVersion " VERSION_EXAMPLE " from " __DATE__));
-    Serial.println(F("Using library version " VERSION_EASY_BUTTON));
+    Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
+
     Serial.println(F("Button debouncing time is reduced to " STR(BUTTON_DEBOUNCING_MILLIS) " ms"));
     Serial.println(F("Please press the button and watch for \"Bouncing, MBP=...\" output at the Serial Monitor"));
 }
