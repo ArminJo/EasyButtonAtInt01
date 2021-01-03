@@ -34,6 +34,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
  */
 
+#if defined(__AVR__)
 #include <Arduino.h>
 #include "EasyButtonAtInt01.h"
 
@@ -52,16 +53,18 @@
 
 // For external measurement of code timing
 //#define MEASURE_EASY_BUTTON_INTERRUPT_TIMING
-#if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING) || defined (LED_FEEDBACK_TEST)
+#if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING) || defined(LED_FEEDBACK_TEST)
 #include "digitalWriteFast.h"
 #endif
 
 #if defined(USE_BUTTON_0)
-EasyButton * EasyButton::sPointerToButton0ForISR;
+EasyButton *EasyButton::sPointerToButton0ForISR;
 #endif
 #if defined(USE_BUTTON_1)
-EasyButton * EasyButton::sPointerToButton1ForISR;
+EasyButton *EasyButton::sPointerToButton1ForISR;
 #endif
+
+// @formatter:off // the eclipse formatter has problems with // comments in undefined code blocks
 
 /*
  * These constructors are deterministic if only one button is enabled
@@ -267,19 +270,25 @@ void EasyButton::init(bool aIsButtonAtINT0) {
         GIMSK |= 1 << PCIE; // PCINT enable, we have only one
         PCMSK = digitalPinToBitMask(INT1_PIN);
 #    endif
-#  elif (INT1_PIN != 3)
-    /*
-     * ATmega328 (Uno, Nano ) etc. Enable pin change interrupt for port PD0 to PD7 (Arduino pin 0 to 7)
-     */
-    PCICR |= 1 << PCIE2;
-    PCMSK2 = digitalPinToBitMask(INT1_PIN);
+#  elif INT1_PIN == 4 || INT1_PIN == 5 || INT1_PIN == 6 || INT1_PIN == 7
+    //ATmega328 (Uno, Nano ) etc. Enable pin change interrupt for port PD0 to PD7 (Arduino pin 0 to 7)
+        PCICR |= 1 << PCIE2;
+        PCMSK2 = digitalPinToBitMask(INT1_PIN);
+#    elif INT1_PIN == 8 || INT1_PIN == 9 || INT1_PIN == 10 || INT1_PIN == 11 || INT1_PIN == 12 || INT1_PIN == 13
+    //ATmega328 (Uno, Nano ) etc. Enable pin change interrupt 0 to 5 for port PB0 to PB5 (Arduino pin 8 to 13)
+        PCICR |= _BV(PCIE0);
+        PCMSK0 = digitalPinToBitMask(INT1_PIN);
+#    elif INT1_PIN == A0 || INT1_PIN == A1 || INT1_PIN == A2 || INT1_PIN == A3 || INT1_PIN == A4 || INT1_PIN == A5
+    //ATmega328 (Uno, Nano ) etc. Enable pin change interrupt 8 to 13 for port PC0 to PC5 (Arduino pin A0 to A5)
+        PCICR |= _BV(PCIE1);
+        PCMSK1 = digitalPinToBitMask(INT1_PIN);
 #  else
 #    if defined(USE_ATTACH_INTERRUPT)
-            attachInterrupt(digitalPinToInterrupt(INT1_PIN), &handleINT1Interrupt, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(INT1_PIN), &handleINT1Interrupt, CHANGE);
 #    else
-            EICRA |= (1 << ISC10);  // interrupt on any logical change
-            EIFR |= 1 << INTF1;     // clear interrupt bit
-            EIMSK |= 1 << INT1;     // enable interrupt on next change
+        EICRA |= (1 << ISC10);  // interrupt on any logical change
+        EIFR |= 1 << INTF1;     // clear interrupt bit
+        EIMSK |= 1 << INT1;     // enable interrupt on next change
 #    endif //USE_ATTACH_INTERRUPT
 #  endif // ! defined(ISC10)
     }
@@ -294,34 +303,36 @@ void EasyButton::init(bool aIsButtonAtINT0) {
 bool EasyButton::readButtonState() {
 #if defined(USE_BUTTON_0) && not defined(USE_BUTTON_1)
 #  if defined(BUTTON_IS_ACTIVE_HIGH)
-        return (INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
+    return (INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
 #  else
-        return !(INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
+    return !(INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
 #  endif
 
 #elif defined(USE_BUTTON_1) && not defined(USE_BUTTON_0)
 #  if defined(BUTTON_IS_ACTIVE_HIGH)
-        return (INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
+    return (INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
 #  else
-        return !(INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
+    return !(INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
 #  endif
 
 #elif defined(USE_BUTTON_0) && defined(USE_BUTTON_1)
 #  if defined(BUTTON_IS_ACTIVE_HIGH)
-        if (isButtonAtINT0) {
-            return (INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
-        } else {
-            return (INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
-        }
+    if (isButtonAtINT0) {
+        return (INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
+    } else {
+        return (INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
+    }
 #  else
-        if (isButtonAtINT0) {
-            return !(INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
-        } else {
-            return !(INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
-        }
+    if (isButtonAtINT0) {
+        return !(INT0_IN_PORT & _BV(INT0_BIT));  //  = digitalReadFast(2);
+    } else {
+        return !(INT1_IN_PORT & _BV(INT1_BIT));  //  = digitalReadFast(3);
+    }
 #  endif
 #endif
 }
+
+// @formatter:on // the eclipse formatter has problems with // comments in undefined code blocks
 
 /*
  * Returns stored state if in debouncing period otherwise current state of button
@@ -654,9 +665,15 @@ ISR(INT0_vect) {
 #    if (! defined(ISC10)) || ((defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)) && INT1_PIN != 3)
 // on ATtinyX5 we do not have a INT1_vect but we can use the PCINT0_vect
 ISR(PCINT0_vect)
-#    elif (INT1_PIN != 3)
+#    elif INT1_PIN == 4 || INT1_PIN == 5 || INT1_PIN == 6 || INT1_PIN == 7
 // PCINT for ATmega328 Arduino pins 0 to 7
 ISR(PCINT2_vect)
+#    elif INT1_PIN == 8 || INT1_PIN == 9 || INT1_PIN == 10 || INT1_PIN == 11 || INT1_PIN == 12 || INT1_PIN == 13
+// PCINT for ATmega328 Arduino pins 8 (PB0) to 13 (PB5) - (PCINT 0 to 5)
+ISR(PCINT0_vect)
+#    elif INT1_PIN == A0 || INT1_PIN == A1 || INT1_PIN == A2 || INT1_PIN == A3 || INT1_PIN == A4 || INT1_PIN == A5
+// PCINT for ATmega328 Arduino pins A1 (PC0) to A5 (PC5) - (PCINT 8 to 13)
+ISR(PCINT1_vect)
 #    else
 ISR(INT1_vect)
 #    endif
@@ -671,3 +688,5 @@ ISR(INT1_vect)
 }
 #  endif
 #endif // not defined(USE_ATTACH_INTERRUPT)
+
+#endif // defined(__AVR__)

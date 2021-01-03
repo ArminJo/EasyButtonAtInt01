@@ -1,7 +1,7 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
 Available as Arduino library "EasyButtonAtInt01"
 
-### [Version 3.1.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
+### [Version 3.2.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -11,10 +11,10 @@ Available as Arduino library "EasyButtonAtInt01"
 
 Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.<br/>
 - No external pullup, **no polling needed**.
-- The library is totally **based on interrupt** and **debouncing is implemented in a not blocking way**. 
+- The library is totally **based on interrupt** and **debouncing is implemented in a not blocking way**.
 Debouncing is merely done by ignoring a button change within the debouncing time (default 50 ms).
 So **button state is instantly available** without debouncing delay!
-- Each button press toggles a state variable, so **no external logic for implementing a toggle button is needed**.
+- Implements **toggle button** functionality.
 - Support for **double press detection** is included. See [EasyButtonExample](examples/EasyButtonExample/EasyButtonExample.ino#L112) and [Callback example](examples/Callback/Callback.ino#L78).
 - Support for **long press detection**, is included. See [Callback example](examples/Callback/Callback.ino#L98).
 - Support for **active high buttons**.
@@ -24,12 +24,12 @@ So **button state is instantly available** without debouncing delay!
 ## Table of available pins for the 2 buttons
 | CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined !=3 |
 |-|-|-|-|
-| ATmega328* | D2 | D3 | Pin 0 to 2, 4 to 7 |
+| ATmega328* | D2 | D3 | Pin 0 to 2, 4 to 13, A0 to A5 |
 | ATtiny5x | PB2 | | PB0 - PB5 |
 | ATtiny167 | PB6 | PA3 | PA0 to PA2, PA4 to PA7 |
 
 To use the PCINT buttons instead of the default one, just define INT1_PIN **before** including *EasyButtonAtInt01.cpp.h*.<br/>
-E.g. `#define INT1_PIN 7`. See [EasyButtonExample.cpp](examples/EasyButtonExample/EasyButtonExample.ino#L46).
+E.g. `#define INT1_PIN 7`. See [EasyButtonExample.cpp](examples/EasyButtonExample/EasyButtonExample.ino#L52).
 
 ## Usage
 To use a single button, it needs only:
@@ -70,7 +70,7 @@ void loop() {
 The button press callback function is is called on every button press with ButtonToggleState as parameter.<br/>
 **The value at the first call (after first press) is true**.<br/>
 The button release callback function is called on every button release with the additional parameter ButtonPressDurationMillis.<br/>
-Both callback functions run in an interrupt service context, which means they should be as short as possible. 
+Both callback functions run in an interrupt service context, which means they should be as short as possible.
 But before a callback function is called, interrupts are enabled.
 This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
 
@@ -136,11 +136,11 @@ void loop() {}
 
 ## Handling the `multiple definition` error
 If you get the error `multiple definition of __vector_1` (or `__vector_2`) because another library uses the attachInterrupt() function,
-then comment out the line `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or 
+then activate the line `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or
 define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE:-(.<br/>
 
-## Consider to use [Sloeber](http://eclipse.baeyens.it/stable.php?OS=Windows) as IDE<br/>
-If you are using Sloeber as your IDE, you can easily define global symbols at *Properties/Arduino/CompileOptions*.<br/>
+## Consider using [Sloeber](http://eclipse.baeyens.it/stable.php?OS=Windows) as IDE<br/>
+If you are using Sloeber as your IDE, you can easily define global symbols at *Properties > Arduino > CompileOptions*.<br/>
 
 ## Class methods
 ```
@@ -165,6 +165,9 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
+###  Version 3.2.0
+- Allow button1 on pin 8 to 13 and A0 to A5 for ATmega328.
+
 ###  Version 3.1.0
 - 2 sets of constructors, one for only one button used and one for the second button if two buttons used.
 - Map pin numbers for Digispark pro boards, for use with with digispark library.
@@ -196,7 +199,7 @@ The library examples are tested with GitHub Actions for the following boards:
 
 - arduino:avr:uno
 - arduino:avr:leonardo
-- arduino:avr:mega          
+- arduino:avr:mega
 - digistump:avr:digispark-tiny1
 - digistump:avr:digispark-pro
 - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
