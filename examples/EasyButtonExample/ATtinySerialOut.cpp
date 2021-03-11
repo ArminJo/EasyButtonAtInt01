@@ -34,7 +34,8 @@
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) \
     || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) \
-    || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+    || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__) \
+    || defined(__AVR_ATtiny88__)
 #include "ATtinySerialOut.h"
 #include <avr/eeprom.h>     // for eeprom_read_byte() in writeString_E()
 
@@ -56,6 +57,12 @@
 //#define TX_PORT_ADDR 0x05
 //#define TX_DDR DDRB
 #  endif
+
+#elif defined(__AVR_ATtiny88__)
+//  MH-ET LIVE Tiny88(16.0MHz) board
+#define TX_PORT PORTD
+#define TX_PORT_ADDR 0x0B // PORTD
+#define TX_DDR DDRD
 
 #else
 //  ATtinyX5 here
@@ -310,7 +317,7 @@ void writeFloat(double aFloat, uint8_t aDigits) {
 }
 
 /******************************************************
- * The TinySerialOut class fuctions which implements
+ * The TinySerialOut class functions which implements
  * the Serial + printHex() and printlnHex() functions
  ******************************************************/
 /*
@@ -851,4 +858,8 @@ void write1Start8Data1StopNoParity_C_Version(uint8_t aValue) {
 // -8 cycles to compensate for fastest repeated call (1 ret + 1 load + 1 call)
     delay4CyclesInlineExact(4); // gives minimum 25 cycles for stop bit :-)
 }
+#elif defined(ARDUINO_ARCH_APOLLO3)
+    void AttinySerialOutDummyToAvoidBFDAssertions(){
+        ;
+    }
 #endif // defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
