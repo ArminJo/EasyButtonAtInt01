@@ -1,5 +1,5 @@
 /*
- * EasyButtonAtInt01.cpp.h
+ * EasyButtonAtInt01.hpp
  *
  *  Arduino library for handling push buttons connected between ground and INT0 and / or INT1 pin.
  *  INT0 and INT1 are connected to Pin 2 / 3 on most Arduinos (ATmega328), to PB6 / PA3 on ATtiny167 and on ATtinyX5 we have only INT0 at PB2.
@@ -360,6 +360,12 @@ void __attribute__ ((weak)) handleINT1Interrupt();
 #endif // defined(__AVR__)
 
 /*
+ *  Version 3.3.0 - 1/2021
+ *  - Renamed EasyButtonAtInt01.cpp.h to EasyButtonAtInt01.hpp.
+ *
+ *  Version 3.2.0 - 1/2021
+ *  - Allow button1 on pin 8 to 13 and A0 to A5 for ATmega328.
+ *
  *  Version 3.1.0 - 6/2020
  *  - 2 sets of constructors, one for only one button used and one for the second button if two buttons used.
  *  - Map pin numbers for Digispark pro boards, for use with with digispark library.
@@ -379,7 +385,7 @@ void __attribute__ ((weak)) handleINT1Interrupt();
  * - Support also PinChangeInterrupt for button 1 on Pin PA0 to PA7 for ATtiniy87/167.
  * - Long press detection support.
  * - Double press detection support.
- * - Renamed to EasyButtonAtInt01.cpp.h
+ * - Renamed to EasyButtonAtInt01.hpp
  */
 
 #endif /* EASY_BUTTON_AT_INT01_H_ */

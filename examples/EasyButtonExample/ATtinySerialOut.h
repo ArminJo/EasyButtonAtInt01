@@ -1,7 +1,7 @@
 /*
  * ATtinySerialOut.h
  *
- *  Copyright (C) 2015-2020  Armin Joachimsmeyer
+ *  Copyright (C) 2015-2021  Armin Joachimsmeyer
  *  Email: armin.joachimsmeyer@gmail.com
  *
  *  This file is part of TinySerialOut https://github.com/ArminJo/ATtinySerialOut.
@@ -33,7 +33,7 @@
 
 // ATMEL ATTINY167
 // Pin numbers are for Digispark core
-// Pin numbers in Parenthesis are for ATTinyCore
+// Pin numbers in parenthesis are for ATTinyCore
 //
 //                    +-\/-+
 //    RX  6 (0) PA0  1|    |20  PB0 (D8)  0 OC1AU  TONE  Timer 1 Channel A
@@ -49,28 +49,52 @@
 //                    +----+
 //
 
+// MH-ET LIVE Tiny88 (16.0MHz) board
+// Digital Pin numbers in parenthesis are for ATTinyCore library
+//                       USB
+//                     +-\__/-+
+//              PA2  15|      |14  PB7
+//              PA3  16|      |13  PB5 SCK
+//           17 PA0  A6|      |12  PB4 MISO
+//           18 PA1  A7|      |11  PB3 MOSI
+//     (D17) 19 PC0  A0|      |10  PB2 OC1B/PWM SS
+//     (D18) 20 PC1  A1|      |9   PB1 OC1A/PWM
+//     (D19) 21 PC2  A2|      |8   PB0
+//     (D20) 22 PC3  A3|      |7   PD7 RX
+//SDA  (D21) 23 PC4  A4|      |6   PD6 TX
+//SCL  (D22) 24 PC5  A5|      |5   PD5
+//     (D23)    PC1  25|      |4   PD4
+//RESET         PC6 RST|      |3   PD3 INT1
+//LED           PD0   0|      |5V
+//USB+          PD1   1|      |GND
+//USB-  INT0    PD2   2|      |VIN
+//                     +------+
+
 #ifndef ATTINY_SERIAL_OUT_H_
 #define ATTINY_SERIAL_OUT_H_
 
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) \
     || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) \
-    || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
+    || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__) \
+    || defined(__AVR_ATtiny88__)
 #include <Arduino.h>
 
-#define VERSION_ATTINY_SERIAL_OUT "1.2.1"
-#define VERSION_ATTINY_SERIAL_OUT_MAJOR 1
-#define VERSION_ATTINY_SERIAL_OUT_MINOR 2
+#define VERSION_ATTINY_SERIAL_OUT "2.0.0"
+#define VERSION_ATTINY_SERIAL_OUT_MAJOR 2
+#define VERSION_ATTINY_SERIAL_OUT_MINOR 0
 
 #if (F_CPU != 1000000) &&  (F_CPU != 8000000) &&  (F_CPU != 16000000)
 #error F_CPU value must be 1000000, 8000000 or 16000000.
 #endif
 
-#if defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#  ifndef TX_PIN
+#if !defined(TX_PIN)
+#  if defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__) // Digispark PRO board
 #define TX_PIN PA1 // (package pin 2 / TXD on Tiny167) - can use one of PA0 to PA7 here
-#  endif
-#else // defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
-#  ifndef TX_PIN
+
+#  elif defined(__AVR_ATtiny88__) //  MH-ET LIVE Tiny88(16.0MHz) board
+#define TX_PIN PD6 // (board pin 6) - can use one of PD3 to PD7 here
+
+#  else // Tiny X4 + X5 Digispark board
 #define TX_PIN PB2 // (package pin 7 on Tiny85) - can use one of PB0 to PB4 (+PB5) here
 #  endif
 #endif
@@ -86,7 +110,7 @@
  * @8/16 MHz use 115200 baud instead of 230400 baud.
  */
 //#define TINY_SERIAL_DO_NOT_USE_115200BAUD
-#ifndef TINY_SERIAL_DO_NOT_USE_115200BAUD  // define this to force using other baud rates
+#if !defined(TINY_SERIAL_DO_NOT_USE_115200BAUD)  // define this to force using other baud rates
 #define USE_115200BAUD
 #endif
 
@@ -128,7 +152,11 @@ void writeFloat(double aFloat, uint8_t aDigits);
 
 char nibbleToHex(uint8_t aByte);
 
+#if defined(TINY_SERIAL_INHERIT_FROM_PRINT)
+class TinySerialOut: public Print
+#else
 class TinySerialOut
+#endif
 {
 public:
 
@@ -145,6 +173,7 @@ public:
     size_t write(uint8_t aByte);
     operator bool(); // To support "while (!Serial); // wait for serial port to connect. Required for Leonardo only
 
+#if !defined(TINY_SERIAL_INHERIT_FROM_PRINT)
     void print(const __FlashStringHelper *aStringPtr);
     void print(const char *aStringPtr);
     void print(char aChar);
@@ -166,13 +195,14 @@ public:
     void println(double aFloat, uint8_t aDigits = 2);
 
     void println(void);
+#endif // TINY_SERIAL_INHERIT_FROM_PRINT
 
 };
 
 // #if ... to be compatible with ATTinyCores and AttinyDigisparkCores
 #if (!defined(UBRRH) && !defined(UBRR0H)) /*AttinyDigisparkCore and AttinyDigisparkCore condition*/ \
     || USE_SOFTWARE_SERIAL /*AttinyDigisparkCore condition*/\
-    || ((defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || defined(LINBRRH)) && !USE_SOFTWARE_SERIAL)/*AttinyDigisparkCore condition for HardwareSerial*/
+    || ((defined(UBRRH) || defined(UBRR0H) || defined(UBRR1H) || (defined(LINBRRH)) && !USE_SOFTWARE_SERIAL))/*AttinyDigisparkCore condition for HardwareSerial*/
 // Switch to SerialOut since Serial is already defined
 // or activate line 745 in TinyDebugSerial.h included in AttinyDigisparkCores/src/tiny/WProgram.h at line 24 for AttinyDigisparkCores
 extern TinySerialOut SerialOut;
@@ -183,7 +213,9 @@ extern TinySerialOut SerialOut;
 #  endif
 extern TinySerialOut Serial;
 #endif
+#if !defined(TINY_SERIAL_INHERIT_FROM_PRINT)
 #define Print TinySerialOut
+#endif
 
 #endif // defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 

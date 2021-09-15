@@ -29,7 +29,7 @@
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0 / D2
 
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 
 #if defined(ARDUINO_AVR_DIGISPARK)
 #define LED_BUILTIN PB1
@@ -47,7 +47,7 @@ void setup() {
 
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__) || defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL) || defined(ARDUINO_attiny3217)
-    delay(4000); // To be able to connect Serial monitor after reset or power up and before first printout
+    delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));

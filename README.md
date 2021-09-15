@@ -28,7 +28,7 @@ So **button state is instantly available** without debouncing delay!
 | ATtiny5x | PB2 | | PB0 - PB5 |
 | ATtiny167 | PB6 | PA3 | PA0 to PA2, PA4 to PA7 |
 
-To use the PCINT buttons instead of the default one, just define INT1_PIN **before** including *EasyButtonAtInt01.cpp.h*.<br/>
+To use the PCINT buttons instead of the default one, just define INT1_PIN **before** including *EasyButtonAtInt01.hpp*.<br/>
 E.g. `#define INT1_PIN 7`. See [EasyButtonExample.cpp](examples/EasyButtonExample/EasyButtonExample.ino#L52).
 
 ## Usage
@@ -36,7 +36,7 @@ To use a single button, it needs only:
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 EasyButton Button0AtPin2;
 
 void setup() {}
@@ -51,7 +51,7 @@ To use 2 buttons, it needs only:
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #define USE_BUTTON_1 // Enable code for button at INT1 (pin3) or PCINT[0:7]
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 EasyButton Button0AtPin2();  // no parameter -> Button is connected to INT0 (pin2)
 EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT); // Button is connected to INT1 (pin3)
 
@@ -69,14 +69,13 @@ void loop() {
 ## Usage of callback functions
 The button press callback function is is called on every button press with ButtonToggleState as parameter.<br/>
 **The value at the first call (after first press) is true**.<br/>
-The button release callback function is called on every button release with the additional parameter ButtonPressDurationMillis.<br/>
-Both callback functions run in an interrupt service context, which means they should be as short as possible.
-But before a callback function is called, interrupts are enabled.
-This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
+The button release callback function is called on every button release with the additional parameter `ButtonPressDurationMillis`.<br/>
+Both callback functions run in an interrupt service context, which means they should be as short/fast as possible.
+In this library, interrupts are enabled before the callback function is called. This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 
 // Initial value is false, so first call is with true
 void handleButtonPress(bool aButtonToggleState) {
@@ -93,7 +92,7 @@ The easiest way is to check it in the button release handler. Do not forget, tha
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
 EasyButton Button0AtPin2(NULL, &handleButtonRelease); // Button is connected to INT0 (pin2)
@@ -116,7 +115,7 @@ Call checkForDoublePress() only from button press callback function. It will not
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 
 void handleButtonPress(bool aButtonToggleState);
 EasyButton Button0AtPin2(&printButtonToggleState);
@@ -189,7 +188,7 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 - Analyzes maximum debouncing period.
 - Double button press detection support.
 - Very short button press handling.
-- Renamed to EasyButtonAtInt01.cpp.h
+- Renamed to EasyButtonAtInt01.hpp
 
 ### Version 1.0.0
 - initial version for ATmega328.

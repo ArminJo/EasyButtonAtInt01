@@ -28,7 +28,7 @@
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0 (pin2)
-#include "EasyButtonAtInt01.cpp.h"
+#include "EasyButtonAtInt01.hpp"
 
 void handleButtonPress(bool aButtonToggleState);    // The button press callback function
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
@@ -50,7 +50,7 @@ void setup() {
 
     Serial.begin(115200);
 #if defined(__AVR_ATmega32U4__) || defined(SERIAL_USB) || defined(SERIAL_PORT_USBVIRTUAL) || defined(ARDUINO_attiny3217)
-    delay(4000); // To be able to connect Serial monitor after reset or power up and before first printout
+    delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
