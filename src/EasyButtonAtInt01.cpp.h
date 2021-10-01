@@ -1,5 +1,5 @@
 /*
- * EasyButtonAtInt01.hpp
+ * EasyButtonAtInt01.cpp.h
  *
  * This file can be directly configured and included in one source.
  * Include EasyButtonAtInt01.h file if you need the declarations in a second source file.
@@ -35,5 +35,6 @@
  */
 
 #if defined(__AVR__)
-#error  ------For version >= 3.3.0 you must change: #include "EasyButtonAtInt01.cpp.h" to: #include "EasyButtonAtInt01.hpp"------
+#warning  ------For version >= 3.3.0 you must change: #include "EasyButtonAtInt01.cpp.h" to: #include "EasyButtonAtInt01.hpp"------
+#include "EasyButtonAtInt01.hpp"
 #endif // defined(__AVR__)

@@ -28,7 +28,7 @@
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define BUTTON_DEBOUNCING_MILLIS 80 // With this you can adapt to the characteristic of your button. Default is 50.
-//#define ANALYZE_MAX_BOUNCING_PERIOD //  Analyze the button actual debounce value
+//#define ANALYZE_MAX_BOUNCING_PERIOD // Analyze the button actual debounce value
 
 #define USE_BUTTON_0  // Enable code for button 0 at INT0.
 #define USE_BUTTON_1  // Enable code for button 1 at INT1 or PCINT[0:7]
@@ -110,6 +110,8 @@ void loop() {
 void handleButtonPress(bool aButtonToggleState) {
     /*
      * This function works reliable only if called early in press callback function
+     * Be aware, that the first press after booting may be detected as double press!
+     * This is because the "last time of press" is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
      */
     if (Button0AtPin2.checkForDoublePress()) {
         Serial.println(F("Button 0 double press (< 400 ms) detected"));

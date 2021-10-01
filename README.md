@@ -1,7 +1,7 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
 Available as Arduino library "EasyButtonAtInt01"
 
-### [Version 3.2.0](https://github.com/ArminJo/EasyButtonAtInt01/releases)
+### [Version 3.3.1](https://github.com/ArminJo/EasyButtonAtInt01/releases) - work in progress
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -112,6 +112,8 @@ void loop() {}
 
 ## Double press detection
 Call checkForDoublePress() only from button press callback function. It will not work as expected called outside this callback function.
+Be aware, that the first press after booting may be detected as double press!
+This is because the "last time of press" `ButtonReleaseMillis` is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
 
 ```
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
@@ -138,8 +140,33 @@ If you get the error `multiple definition of __vector_1` (or `__vector_2`) becau
 then activate the line `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or
 define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE:-(.<br/>
 
-## Consider using [Sloeber](http://eclipse.baeyens.it/stable.php?OS=Windows) as IDE<br/>
-If you are using Sloeber as your IDE, you can easily define global symbols at *Properties > Arduino > CompileOptions*.<br/>
+
+# Compile options / macros for this library
+To customize the software to different requrements, there are some compile options / macros available.<br/>
+These macros must be defined in your program before the line `#include "EasyButtonAtInt01.hpp"`.<br/>
+Or define the macro with the -D compiler option for global compile (the latter is not possible with the Arduino IDE, so consider using [Sloeber](https://eclipse.baeyens.it).<br/>
+| Option | Default | Description |
+|-|-|-|
+| `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). |
+| `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). |
+| `BUTTON_IS_ACTIVE_HIGH` | disabled | Enable this if you buttons are active high. |
+| `USE_ATTACH_INTERRUPT` | disabled | This forces use of the arduino function attachInterrupt(). It is required if you get the error " multiple definition of `__vector_1'" (or `__vector_2'), because another library uses the attachInterrupt() function.. |
+| `NO_BUTTON_RELEASE_CALLBACK` | disabled | Disables the code for release callback. This saves 2 bytes RAM and 64 bytes FLASH. |
+| `BUTTON_DEBOUNCING_MILLIS` | 50 | With this you can adapt to the characteristic of your button. |
+| `ANALYZE_MAX_BOUNCING_PERIOD` | disabled | Analyze the buttons actual debounce value. |
+| `BUTTON_LED_FEEDBACK` | disabled | This activates LED_BUILTIN as long as button is pressed. |
+| `BUTTON_LED_FEEDBACK_PIN` | disabled | The pin to use for button LED feedback. |
+
+# Modifying compile options
+### Modifying compile options with Arduino IDE
+First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
+If you did not yet stored the example as your own sketch, then you are instantly in the right library folder.<br/>
+Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
+In both cases the library files itself are located in the `src` directory.<br/>
+
+### Modifying compile options with Sloeber IDE
+If you are using Sloeber as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
+![Sloeber settings](https://github.com/ArminJo/ServoEasing/blob/master/pictures/SloeberDefineSymbols.png)
 
 ## Class methods
 ```
@@ -164,6 +191,9 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
+###  Version 3.3.0
+- Renamed EasyButtonAtInt01.cpp.h to EasyButtonAtInt01.hpp..
+
 ###  Version 3.2.0
 - Allow button1 on pin 8 to 13 and A0 to A5 for ATmega328.
 
