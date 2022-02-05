@@ -1,5 +1,5 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
-Available as Arduino library "EasyButtonAtInt01"
+Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.
 
 ### [Version 3.3.1](https://github.com/ArminJo/EasyButtonAtInt01/releases) - work in progress
 
@@ -7,9 +7,11 @@ Available as Arduino library "EasyButtonAtInt01"
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
 [![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/EasyButtonAtInt01/latest)](https://github.com/ArminJo/EasyButtonAtInt01/commits/master)
 [![Build Status](https://github.com/ArminJo/EasyButtonAtInt01/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/EasyButtonAtInt01/actions)
-[![Hit Counter](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FArminJo%2FEasyButtonAtInt01)](https://github.com/brentvollebregt/hit-counter)
+![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_EasyButtonAtInt01)
 
-Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.<br/>
+Available as [Arduino library "EasyButtonAtInt01"](https://www.arduinolibraries.info/libraries/easy-button-at-int01).
+
+# Features
 - No external pullup, **no polling needed**.
 - The library is totally **based on interrupt** and **debouncing is implemented in a not blocking way**.
 Debouncing is merely done by ignoring a button change within the debouncing time (default 50 ms).
@@ -34,7 +36,7 @@ E.g. `#define INT1_PIN 7`. See [EasyButtonExample.cpp](examples/EasyButtonExampl
 ## Usage
 To use a single button, it needs only:
 
-```
+```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.hpp"
 EasyButton Button0AtPin2;
@@ -48,7 +50,7 @@ void loop() {
 ```
 To use 2 buttons, it needs only:
 
-```
+```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #define USE_BUTTON_1 // Enable code for button at INT1 (pin3) or PCINT[0:7]
 #include "EasyButtonAtInt01.hpp"
@@ -73,7 +75,7 @@ The button release callback function is called on every button release with the 
 Both callback functions run in an interrupt service context, which means they should be as short/fast as possible.
 In this library, interrupts are enabled before the callback function is called. This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
 
-```
+```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.hpp"
 
@@ -90,7 +92,7 @@ void loop() {}
 ## Long press detection
 The easiest way is to check it in the button release handler. Do not forget, that you will get a press callback (if enabled) at the start of the long press.
 
-```
+```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.hpp"
 
@@ -115,7 +117,7 @@ Call checkForDoublePress() only from button press callback function. It will not
 Be aware, that the first press after booting may be detected as double press!
 This is because the "last time of press" `ButtonReleaseMillis` is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
 
-```
+```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
 #include "EasyButtonAtInt01.hpp"
 
@@ -138,38 +140,42 @@ void loop() {}
 ## Handling the `multiple definition` error
 If you get the error `multiple definition of __vector_1` (or `__vector_2`) because another library uses the attachInterrupt() function,
 then activate the line `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or
-define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE:-(.<br/>
+define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE :disappointed:.<br/>
 
 
 # Compile options / macros for this library
-To customize the software to different requrements, there are some compile options / macros available.<br/>
-These macros must be defined in your program before the line `#include "EasyButtonAtInt01.hpp"`.<br/>
-Or define the macro with the -D compiler option for global compile (the latter is not possible with the Arduino IDE, so consider using [Sloeber](https://eclipse.baeyens.it).<br/>
+To customize the library to different requirements, there are some compile options / macros available.<br/>
+These macros must be defined in your program before the line `#include "EasyButtonAtInt01.hpp"` to take effect.<br/>
+Modify them by enabling / disabling them, or change the values if applicable.
+
 | Option | Default | Description |
 |-|-|-|
 | `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). |
 | `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). |
 | `BUTTON_IS_ACTIVE_HIGH` | disabled | Enable this if you buttons are active high. |
-| `USE_ATTACH_INTERRUPT` | disabled | This forces use of the arduino function attachInterrupt(). It is required if you get the error " multiple definition of `__vector_1'" (or `__vector_2'), because another library uses the attachInterrupt() function.. |
+| `USE_ATTACH_INTERRUPT` | disabled | This forces use of the arduino function attachInterrupt(). It is required if you get the error "multiple definition of \`__vector_1'" (or \`__vector_2'), because another library uses the attachInterrupt() function. |
 | `NO_BUTTON_RELEASE_CALLBACK` | disabled | Disables the code for release callback. This saves 2 bytes RAM and 64 bytes FLASH. |
 | `BUTTON_DEBOUNCING_MILLIS` | 50 | With this you can adapt to the characteristic of your button. |
 | `ANALYZE_MAX_BOUNCING_PERIOD` | disabled | Analyze the buttons actual debounce value. |
 | `BUTTON_LED_FEEDBACK` | disabled | This activates LED_BUILTIN as long as button is pressed. |
 | `BUTTON_LED_FEEDBACK_PIN` | disabled | The pin to use for button LED feedback. |
 
-# Modifying compile options
-### Modifying compile options with Arduino IDE
+### Changing include (*.h) files with Arduino IDE
 First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
-If you did not yet stored the example as your own sketch, then you are instantly in the right library folder.<br/>
+If you have not yet saved the example as your own sketch, then you are instantly in the right library folder.<br/>
 Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
-In both cases the library files itself are located in the `src` directory.<br/>
+In both cases the library source and include files are located in the libraries `src` directory.<br/>
+The modification must be renewed for each new library version!
 
-### Modifying compile options with Sloeber IDE
-If you are using Sloeber as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
-![Sloeber settings](https://github.com/ArminJo/ServoEasing/blob/master/pictures/SloeberDefineSymbols.png)
+### Modifying compile options / macros with PlatformIO
+If you are using PlatformIO, you can define the macros in the *[platformio.ini](https://docs.platformio.org/en/latest/projectconf/section_env_build.html)* file with `build_flags = -D MACRO_NAME` or `build_flags = -D MACRO_NAME=macroValue`.
+
+### Modifying compile options / macros with Sloeber IDE
+If you are using [Sloeber](https://eclipse.baeyens.it) as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
+![Sloeber settings](https://github.com/Arduino-IRremote/Arduino-IRremote/blob/master/pictures/SloeberDefineSymbols.png)
 
 ## Class methods
-```
+```c++
 EasyButton(); // Constructor for button at INT0
 EasyButton(void (*aButtonPressCallback)(bool aButtonToggleState)); // Constructor for button at INT0
 
@@ -192,7 +198,7 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 
 # Revision History
 ###  Version 3.3.0
-- Renamed EasyButtonAtInt01.cpp.h to EasyButtonAtInt01.hpp..
+- Renamed EasyButtonAtInt01.cpp.h to EasyButtonAtInt01.hpp.
 
 ###  Version 3.2.0
 - Allow button1 on pin 8 to 13 and A0 to A5 for ATmega328.
