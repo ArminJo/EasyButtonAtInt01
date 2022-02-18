@@ -76,8 +76,6 @@ void blinkLEDBlocking(uint8_t aLedPin, uint8_t aBlinkCount, uint16_t aDelay) {
 void handleButtonPress(bool aButtonToggleState) {
     /*
      * Double press (< 200 ms) detection by calling checkForForDoublePress() once at button press time.
-     * Be aware, that the first press after booting may be detected as double press!
-     * This is because the "last time of press" is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
      */
     if (Button0AtPin2.checkForDoublePress(300)) {
         Serial.print(F("Double press "));

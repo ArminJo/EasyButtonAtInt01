@@ -243,7 +243,7 @@ void writeUnsignedByte(uint8_t aByte) {
 }
 
 /*
- * 2 Byte Hex output
+ * 2 byte Hex output
  */
 void writeUnsignedByteHex(uint8_t aByte) {
     char tStringBuffer[3];
@@ -261,7 +261,7 @@ void writeUnsignedByteHex(uint8_t aByte) {
 }
 
 /*
- * 2 Byte Hex output with 2 Byte prefix "0x"
+ * 2 byte Hex output with 2 byte prefix "0x"
  */
 void writeUnsignedByteHexWithPrefix(uint8_t aByte) {
     writeBinary('0');
@@ -354,7 +354,7 @@ void TinySerialOut::flush() {
 }
 
 /*
- * 2 Byte Hex output with 2 Byte prefix "0x"
+ * 2 byte Hex output with 2 byte prefix "0x"
  */
 void TinySerialOut::printHex(uint8_t aByte) {
     writeUnsignedByteHexWithPrefix(aByte);
@@ -530,7 +530,7 @@ inline void delay4CyclesExact(uint16_t a4Microseconds) {
  * 115200 baud - 8,680 cycles per bit, 86,8 per byte at 1 MHz
  *
  *  Assembler code for 115200 baud extracted from Digispark core files:
- *  Code size is 196 Byte (including first call)
+ *  Code size is 196 byte (including first call)
  *
  *   TinySerialOut.h - Tiny write-only software serial.
  *   Copyright 2010 Rowdy Dog Software. This code is part of Arduino-Tiny.
@@ -680,7 +680,7 @@ void write1Start8Data1StopNoParity(uint8_t aValue) {
 }
 #else
 /*
- * Small code using loop. Code size is 76 Byte (including first call)
+ * Small code using loop. Code size is 76 byte (including first call)
  *
  * 1 MHz CPU Clock
  *  26,04 cycles per bit, 260,4 per byte for 38400 baud at 1 MHz Clock

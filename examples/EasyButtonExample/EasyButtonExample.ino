@@ -109,9 +109,7 @@ void loop() {
 
 void handleButtonPress(bool aButtonToggleState) {
     /*
-     * This function works reliable only if called early in press callback function
-     * Be aware, that the first press after booting may be detected as double press!
-     * This is because the "last time of press" is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
+     * checkForDoublePress() works reliable only if called early in press callback function
      */
     if (Button0AtPin2.checkForDoublePress()) {
         Serial.println(F("Button 0 double press (< 400 ms) detected"));

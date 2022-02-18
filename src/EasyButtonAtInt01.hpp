@@ -15,7 +15,7 @@
  *  #include "EasyButtonAtInt01.hpp"
  *  EasyButton Button0AtPin2(true);
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2022  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
@@ -42,7 +42,7 @@
  * - USE_BUTTON_1                   Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5).
  * - BUTTON_IS_ACTIVE_HIGH          Enable this if you buttons are active high.
  * - USE_ATTACH_INTERRUPT           This forces use of the arduino function attachInterrupt(). It is required if you get the error "multiple definition of __vector_1".
- * - NO_BUTTON_RELEASE_CALLBACK     Disables the code for release callback. This saves 2 bytes RAM and 64 bytes FLASH.
+ * - NO_BUTTON_RELEASE_CALLBACK     Disables the code for release callback. This saves 2 bytes RAM and 64 bytes program space.
  * - BUTTON_DEBOUNCING_MILLIS       With this you can adapt to the characteristic of your button.
  * - ANALYZE_MAX_BOUNCING_PERIOD    Analyze the buttons actual debounce value.
  * - BUTTON_LED_FEEDBACK            This activates LED_BUILTIN as long as button is pressed.
@@ -458,13 +458,19 @@ bool EasyButton::checkForLongPressBlocking(uint16_t aLongPressThresholdMillis) {
  * Double press detection by computing difference between current (active) timestamp ButtonLastChangeMillis
  * and last release timestamp ButtonReleaseMillis.
  * !!!Works only reliable if called early in ButtonPress callback function!!!
- * Be aware, that the first press after booting may be detected as double press!
- * This is because ButtonReleaseMillis is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
  * @return true if double press detected.
  */
 bool EasyButton::checkForDoublePress(uint16_t aDoublePressDelayMillis) {
-    unsigned long tReleaseToPressTimeMillis = ButtonLastChangeMillis - ButtonReleaseMillis;
-    return (tReleaseToPressTimeMillis <= aDoublePressDelayMillis);
+    /*
+     * Check if ButtonReleaseMillis is not in initialized state
+     * otherwise a single press before aDoublePressDelayMillis after boot is mistakenly detected as double press
+     */
+    if (ButtonReleaseMillis != 0) {
+        // because ButtonReleaseMillis is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
+        unsigned long tReleaseToPressTimeMillis = ButtonLastChangeMillis - ButtonReleaseMillis;
+        return (tReleaseToPressTimeMillis <= aDoublePressDelayMillis);
+    }
+    return false;
 }
 
 /*
