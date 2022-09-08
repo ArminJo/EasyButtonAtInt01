@@ -1,10 +1,11 @@
 /*
- *  EasyButtonExample.cpp
+ *  TwoButtons.cpp
  *
- *  Example for one or two buttons
- *  Button1 using PCINT0 - PA7 on an ATtiny167 and
+ *  Example for two buttons
+ *  Button 0 is using INT0.
+ *  Button 1 is using INT1 or INT1_PIN with PinChangeInterrupt, if INT1_PIN is defined.
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2022  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
@@ -20,7 +21,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
  *
  */
 
@@ -31,7 +32,7 @@
 //#define ANALYZE_MAX_BOUNCING_PERIOD // Analyze the button actual debounce value
 
 #define USE_BUTTON_0  // Enable code for button 0 at INT0.
-#define USE_BUTTON_1  // Enable code for button 1 at INT1 or PCINT[0:7]
+#define USE_BUTTON_1  // Enable code for button 1 at INT1 or INT1_PIN
 
 // definitions for ATtinies
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
@@ -60,10 +61,10 @@
 
 #include "EasyButtonAtInt01.hpp"
 
-// The callback function for button 1
+// The callback function for button 0
 void handleButtonPress(bool aButtonToggleState);
 EasyButton Button0AtPin2(&handleButtonPress);       // Only callback parameter -> button is connected to INT0
-EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT);  // Button is connected to INT1 or PCINT[0:7]
+EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT);  // Button is connected to INT1 or INT1_PIN if INT1_PIN is defined.
 
 long sOldDeltaMillis;
 
@@ -72,7 +73,7 @@ void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
 
     Serial.begin(115200);
-#if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) || defined(SERIALUSB_PID) || defined(ARDUINO_attiny3217)
+#if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) /*stm32duino*/|| defined(USBCON) /*STM32_stm32*/|| defined(SERIALUSB_PID) || defined(ARDUINO_attiny3217)
     delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
 #endif
     // Just to know which program is running on my Arduino
@@ -82,8 +83,7 @@ void setup() {
 void loop() {
 
     /*
-     * Button 1 - check manually.
-     * But it is easier to just use a callback function as we do for button 0
+     * Button 1 - check manually here as demonstration, but it would be easier to just use a callback function like we do for button 0
      */
     Button1AtPin3.updateButtonState(); // this is ONLY required if we expect a regular button press which is shorter than BUTTON_DEBOUNCING_MILLIS!
     if (Button1AtPin3.ButtonStateHasJustChanged) {
@@ -109,7 +109,7 @@ void loop() {
 
 void handleButtonPress(bool aButtonToggleState) {
     /*
-     * checkForDoublePress() works reliable only if called early in press callback function
+     * checkForDoublePress() works reliable only, if called early in press callback function
      */
     if (Button0AtPin2.checkForDoublePress()) {
         Serial.println(F("Button 0 double press (< 400 ms) detected"));

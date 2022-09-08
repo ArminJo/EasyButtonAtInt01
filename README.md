@@ -1,7 +1,7 @@
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
 Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.
 
-### [Version 3.3.1](https://github.com/ArminJo/EasyButtonAtInt01/releases) - work in progress
+### [Version 3.3.2](https://github.com/ArminJo/EasyButtonAtInt01/releases) - work in progress
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
@@ -17,21 +17,22 @@ Available as [Arduino library "EasyButtonAtInt01"](https://www.arduinolibraries.
 Debouncing is merely done by ignoring a button change within the debouncing time (default 50 ms).
 So **button state is instantly available** without debouncing delay!
 - Implements **toggle button** functionality.
-- Support for **double press detection** is included. See [EasyButtonExample](examples/EasyButtonExample/EasyButtonExample.ino#L111) and [Callback example](examples/Callback/Callback.ino#L77).
+- Support for **double press detection** is included. See [TwoButtons](examples/TwoButtons/TwoButtons.ino#L111) and [Callback example](examples/Callback/Callback.ino#L77).
 - Support for **long press detection**, is included. See [Callback example](examples/Callback/Callback.ino#L97).
 - Support for **active high buttons**.
 - Small memory footprint.
 - Support to **measure maximum bouncing period of a button**. See [DebounceTest example](examples/DebounceTest/DebounceTest.ino#L62).
+- Button 1 can used at any pin supporting pin change interrupt.
 
 ## Table of available pins for the 2 buttons
-| CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined !=3 |
+| CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined != 3 |
 |-|-|-|-|
 | ATmega328* | D2 | D3 | Pin 0 to 2, 4 to 13, A0 to A5 |
 | ATtiny5x | PB2 | | PB0 - PB5 |
 | ATtiny167 | PB6 | PA3 | PA0 to PA2, PA4 to PA7 |
 
 To use the PCINT buttons instead of the default one, just define INT1_PIN **before** including *EasyButtonAtInt01.hpp*.<br/>
-E.g. `#define INT1_PIN 7`. See [EasyButtonExample.cpp](examples/EasyButtonExample/EasyButtonExample.ino#L52).
+E.g. `#define INT1_PIN 7`. See [TwoButtons.cpp](examples/TwoButtons/TwoButtons.ino#L52).
 
 ## Usage
 To use a single button, it needs only:
@@ -145,16 +146,17 @@ define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in 
 
 # Compile options / macros for this library
 To customize the library to different requirements, there are some compile options / macros available.<br/>
-These macros must be defined in your program before the line `#include "EasyButtonAtInt01.hpp"` to take effect.<br/>
+These macros must be defined in your program **before** the line `#include "EasyButtonAtInt01.hpp"` to take effect.<br/>
 Modify them by enabling / disabling them, or change the values if applicable.
 
-| Option | Default | Description |
+| Name | Default value | Description |
 |-|-|-|
 | `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). |
 | `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). |
+| `INT1_PIN` | % | It overrides the usage of pin at the processors INT1 pin. Thus, it is the pin number of the pin for button 1 to use with Pin Change Interrupts. |
 | `BUTTON_IS_ACTIVE_HIGH` | disabled | Enable this if you buttons are active high. |
 | `USE_ATTACH_INTERRUPT` | disabled | This forces use of the arduino function attachInterrupt(). It is required if you get the error "multiple definition of \`__vector_1'" (or \`__vector_2'), because another library uses the attachInterrupt() function. |
-| `NO_BUTTON_RELEASE_CALLBACK` | disabled | Disables the code for release callback. This saves 2 bytes RAM and 64 bytes program space. |
+| `NO_BUTTON_RELEASE_CALLBACK` | disabled | Disables the code for release callback. This saves 2 bytes RAM and 64 bytes program memory. |
 | `BUTTON_DEBOUNCING_MILLIS` | 50 | With this you can adapt to the characteristic of your button. |
 | `ANALYZE_MAX_BOUNCING_PERIOD` | disabled | Analyze the buttons actual debounce value. |
 | `BUTTON_LED_FEEDBACK` | disabled | This activates LED_BUILTIN as long as button is pressed. |
@@ -197,6 +199,8 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
+###  Version 3.3.2 - work in progress
+
 ###  Version 3.3.1
 - Avoid mistakenly double press detection after boot.
 
