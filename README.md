@@ -23,6 +23,7 @@ So **button state is instantly available** without debouncing delay!
 - Small memory footprint.
 - Support to **measure maximum bouncing period of a button**. See [DebounceTest example](examples/DebounceTest/DebounceTest.ino#L62).
 - Button 1 can used at any pin supporting pin change interrupt.
+- The exact pin numbers of the buttons are available by the macros INT0_PIN and INT1_PIN, which are set after the include.
 
 ## Table of available pins for the 2 buttons
 | CPU | Button 0 | Button 1 using INT1 | Button 1 using PCINT, if INT1_PIN is defined != 3 |
@@ -58,7 +59,12 @@ To use 2 buttons, it needs only:
 EasyButton Button0AtPin2();  // no parameter -> Button is connected to INT0 (pin2)
 EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT); // Button is connected to INT1 (pin3)
 
-void setup() {}
+void setup() {
+    Serial.print(F("Button0 pin="));
+    Serial.print(INT0_PIN);
+    Serial.print(F(" Button1 pin="));
+    Serial.println(INT1_PIN);
+}
 void loop() {
 ...
     digitalWrite(LED_BUILTIN, Button0AtPin2.ButtonToggleState);
@@ -151,8 +157,8 @@ Modify them by enabling / disabling them, or change the values if applicable.
 
 | Name | Default value | Description |
 |-|-|-|
-| `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). |
-| `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). |
+| `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). The macro INT0_PIN is set after the include. |
+| `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). The macro INT1_PIN is set after the include. |
 | `INT1_PIN` | % | It overrides the usage of pin at the processors INT1 pin. Thus, it is the pin number of the pin for button 1 to use with Pin Change Interrupts. |
 | `NO_INITIALIZE_IN_CONSTRUCTOR` | disabled | Disables the auto initializing in all constructors without the aIsButtonAtINT0 parameter. Must be used if buttons must be initialized manually (e.g. later in setup). |
 | `BUTTON_IS_ACTIVE_HIGH` | disabled | Enable this if you buttons are active high. |
@@ -164,7 +170,7 @@ Modify them by enabling / disabling them, or change the values if applicable.
 | `BUTTON_LED_FEEDBACK_PIN` | disabled | The pin to use for button LED feedback. |
 | `INTENTIONALLY_USE_PCI0_FOR_BUTTON1` | disabled | To suppress the warning: "Using PCINT0 interrupt for button 1". |
 
-
+The exact pin numbers of the buttons used internally are available by the macros INT0_PIN and INT1_PIN, which are set after the include.
 
 ### Changing include (*.h) files with Arduino IDE
 First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>

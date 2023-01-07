@@ -13,8 +13,8 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
@@ -206,6 +206,9 @@ public:
 };
 
 // This if is required to be compatible with ATTinyCores and AttinyDigisparkCores
+#if defined(USE_SOFTWARE_SERIAL) && (7-USE_SOFTWARE_SERIAL-7 == 14)
+#define USE_SOFTWARE_SERIAL 1   // define it to 1 if it is only defined, but has no value
+#endif
 #if defined(DEFAULT_TO_TINY_DEBUG_SERIAL) /*AttinyDigisparkCore condition for defining Serial at line 745 in TinyDebugSerial.h*/ \
     || ((!defined(UBRRH) && !defined(UBRR0H)) || (defined(USE_SOFTWARE_SERIAL) && USE_SOFTWARE_SERIAL)) /*ATTinyCore condition for defining Serial at line 55 in TinySoftwareSerial.h*/\
     || ((defined(UBRRH) || defined(UBRR0H) || (defined(LINBRRH)) && !USE_SOFTWARE_SERIAL)) /*ATTinyCore condition for for defining Serial at line 71ff in HardwareSerial.h*/
