@@ -40,7 +40,7 @@
 #define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
 
-EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
+EasyButton PageSwitchButton0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -61,9 +61,9 @@ void loop() {
      * Manually check button state change
      * Using a callback function is sometimes easier, see EasyButtonExample and Callback example.
      */
-    if (Button0AtPin2.ButtonStateHasJustChanged) {
+    if (PageSwitchButton0AtPin2.ButtonStateHasJustChanged) {
         // reset flag in order to do call digitalWrite() only once per button press
-        Button0AtPin2.ButtonStateHasJustChanged = false;
-        digitalWrite(LED_BUILTIN, Button0AtPin2.ButtonToggleState);
+        PageSwitchButton0AtPin2.ButtonStateHasJustChanged = false;
+        digitalWrite(LED_BUILTIN, PageSwitchButton0AtPin2.ButtonToggleState);
     }
 }

@@ -30,7 +30,7 @@
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
 //#define BUTTON_DEBOUNCING_MILLIS 80 // With this you can adapt to the characteristic of your button. Default is 50.
 //#define ANALYZE_MAX_BOUNCING_PERIOD // Analyze the button actual debounce value
-
+//#define NO_BUTTON_RELEASE_CALLBACK  // Disables the code for release callback. This saves 2 bytes RAM and 64 bytes program memory.
 #define USE_BUTTON_0  // Enable code for button 0 at INT0.
 #define USE_BUTTON_1  // Enable code for button 1 at INT1 or INT1_PIN
 
@@ -38,8 +38,8 @@
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__)
 #include "ATtinySerialOut.hpp" // Available as Arduino library "ATtinySerialOut"
 
-#  if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) && TX_PIN == PB2
-#error Please change TX_PIN in ATtinySerialOut.h from PB2 to e.g. PB0 for use with this example
+#  if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) && TX_PIN == PIN_PB2
+#error Please change TX_PIN in ATtinySerialOut.h from PIN_PB2 to e.g. PIN_PB0 for use with this example
 #  endif
 
 #  if defined(ARDUINO_AVR_DIGISPARK)

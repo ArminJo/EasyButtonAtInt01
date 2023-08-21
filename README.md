@@ -80,7 +80,7 @@ The button press callback function is is called on every button press with Butto
 **The value at the first call (after first press) is true**.<br/>
 The button release callback function is called on every button release with the additional parameter `ButtonPressDurationMillis`.<br/>
 Both callback functions run in an interrupt service context, which means they should be as short/fast as possible.
-In this library, interrupts are enabled before the callback function is called. This allows the timer interrupt for millis() to work and therfore **delay() and millis() can be used in a callback function**.
+In this library, interrupts are enabled before the callback function is called. This allows the timer interrupt for millis() to work and therefore **delay() and millis() can be used in a callback function**.
 
 ```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
@@ -160,7 +160,7 @@ Modify them by enabling / disabling them, or change the values if applicable.
 | `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). The macro INT0_PIN is set after the include. |
 | `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). The macro INT1_PIN is set after the include. |
 | `INT1_PIN` | % | It overrides the usage of pin at the processors INT1 pin. Thus, it is the pin number of the pin for button 1 to use with Pin Change Interrupts. |
-| `NO_INITIALIZE_IN_CONSTRUCTOR` | disabled | Disables the auto initializing in all constructors without the aIsButtonAtINT0 parameter. Must be used if buttons must be initialized manually (e.g. later in setup). |
+| `NO_INITIALIZE_IN_CONSTRUCTOR` | disabled | Disables the auto initializing in all constructors without the "aIsButtonAtINT0" parameter. Must be used if buttons must be initialized manually (e.g. later in setup). |
 | `BUTTON_IS_ACTIVE_HIGH` | disabled | Enable this if you buttons are active high. |
 | `USE_ATTACH_INTERRUPT` | disabled | This forces use of the arduino function attachInterrupt(). It is required if you get the error "multiple definition of \`__vector_1'" (or \`__vector_2'), because another library uses the attachInterrupt() function. |
 | `NO_BUTTON_RELEASE_CALLBACK` | disabled | Disables the code for release callback. This saves 2 bytes RAM and 64 bytes program memory. |
@@ -168,7 +168,7 @@ Modify them by enabling / disabling them, or change the values if applicable.
 | `ANALYZE_MAX_BOUNCING_PERIOD` | disabled | Analyze the buttons actual debounce value. |
 | `BUTTON_LED_FEEDBACK` | disabled | This activates LED_BUILTIN as long as button is pressed. |
 | `BUTTON_LED_FEEDBACK_PIN` | disabled | The pin to use for button LED feedback. |
-| `INTENTIONALLY_USE_PCI0_FOR_BUTTON1` | disabled | To suppress the warning: "Using PCINT0 interrupt for button 1". |
+| `INTENTIONALLY_USE_PCI0_FOR_BUTTON1` | disabled | Activate it to suppress the warning: "Using PCINT0 interrupt for button 1". |
 
 The exact pin numbers of the buttons used internally are available by the macros INT0_PIN and INT1_PIN, which are set after the include.
 
