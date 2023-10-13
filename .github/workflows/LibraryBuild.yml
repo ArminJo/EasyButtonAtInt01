@@ -76,3 +76,5 @@ jobs:
           platform-url: ${{ matrix.platform-url }}
 #          sketches-exclude: ${{ matrix.sketches-exclude }}
           build-properties: ${{ toJson(matrix.build-properties) }}
+          cli-version: 0.33.0 # to avoid errors for ATTinyCore
+          

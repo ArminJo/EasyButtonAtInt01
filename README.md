@@ -1,15 +1,32 @@
+<div align = center>
+
 # [EasyButton](https://github.com/ArminJo/EasyButtonAtInt01)
-Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 pin.
+Lightweight Arduino library for handling push buttons just connected between ground and INT0 and / or INT1 or any other PCINT pin.
 
-### [Version 3.3.2](https://github.com/ArminJo/EasyButtonAtInt01/releases) - work in progress
-
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Installation instructions](https://www.ardu-badge.com/badge/EasyButtonAtInt01.svg?)](https://www.ardu-badge.com/EasyButtonAtInt01)
-[![Commits since latest](https://img.shields.io/github/commits-since/ArminJo/EasyButtonAtInt01/latest)](https://github.com/ArminJo/EasyButtonAtInt01/commits/master)
-[![Build Status](https://github.com/ArminJo/EasyButtonAtInt01/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/EasyButtonAtInt01/actions)
-![Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_EasyButtonAtInt01)
+[![Badge License: GPLv3](https://img.shields.io/badge/License-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
+ &nbsp; &nbsp; 
+[![Badge Version](https://img.shields.io/github/v/release/ArminJo/EasyButtonAtInt01?include_prereleases&color=yellow&logo=DocuSign&logoColor=white)](https://github.com/ArminJo/EasyButtonAtInt01/releases/latest)
+ &nbsp; &nbsp; 
+[![Badge Commits since latest](https://img.shields.io/github/commits-since/ArminJo/EasyButtonAtInt01/latest?color=yellow)](https://github.com/ArminJo/EasyButtonAtInt01/commits/master)
+ &nbsp; &nbsp; 
+[![Badge Build Status](https://github.com/ArminJo/EasyButtonAtInt01/workflows/LibraryBuild/badge.svg)](https://github.com/ArminJo/EasyButtonAtInt01/actions)
+ &nbsp; &nbsp; 
+![Badge Hit Counter](https://visitor-badge.laobi.icu/badge?page_id=ArminJo_EasyButtonAtInt01)
+<br/>
+<br/>
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 Available as [Arduino library "EasyButtonAtInt01"](https://www.arduinolibraries.info/libraries/easy-button-at-int01).
+
+[![Button Install](https://img.shields.io/badge/Install-brightgreen?logoColor=white&logo=GitBook)](https://www.ardu-badge.com/EasyButtonAtInt01)
+ &nbsp; &nbsp; 
+[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/EasyButtonAtInt01#revision-history)
+
+</div>
+
+#### If you find this library useful, please give it a star.
+
+<br/>
 
 # Features
 - No external pullup, **no polling needed**.
@@ -97,7 +114,7 @@ void loop() {}
 ```
 
 ## Long press detection
-The easiest way is to check it in the button release handler. Do not forget, that you will get a press callback (if enabled) at the start of the long press.
+The easiest way is to use the button release handler. Keep in mind, that you will get a press callback at the start of the long press.
 
 ```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
@@ -116,13 +133,33 @@ handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis
 
 void setup() {}
 void loop() {}
-}
 ```
 
+Or check in loop, this enables to react with feedback as soon as long press duration is reached.
+
+```c++
+#define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
+#include "EasyButtonAtInt01.hpp"
+
+bool sLongPressMessageSent = false;
+void handleButtonPress(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {sLongPressMessageSent = false};
+EasyButton Button0AtPin2(&handleButtonPress); // Button is connected to INT0 (pin2)
+
+void setup() {}
+void loop() {
+if (!sLongPressMessageSent && Button0AtPin2.checkForLongPress(1000) == EASY_BUTTON_LONG_PRESS_DETECTED) {
+        Serial.println(F("Long press of 1000 ms just detected"));
+        sLongPressMessageSent = true; // Print message only once per long press
+}
+
+```
+
+
+    if (sLCDDisplayPage == POWER_METER_PAGE_INFO && PageButtonAtPin3.checkForLongPress(1000) == EASY_BUTTON_LONG_PRESS_DETECTED) {
+
+
 ## Double press detection
-Call checkForDoublePress() only from button press callback function. It will not work as expected called outside this callback function.
-Be aware, that the first press after booting may be detected as double press!
-This is because the "last time of press" `ButtonReleaseMillis` is initialized with 0 milliseconds, which is interpreted as the first press happened at the beginning of boot.
+**Call checkForDoublePress() only from button press callback function**. It will not work as expected, if called outside this callback function.
 
 ```c++
 #define USE_BUTTON_0 // Enable code for button at INT0 (pin2)
@@ -144,10 +181,13 @@ void setup() {}
 void loop() {}
 ```
 
-## Handling the `multiple definition` error
+<br/>
+
+# Handling the `multiple definition` error
 If you get the error `multiple definition of __vector_1` (or `__vector_2`) because another library uses the attachInterrupt() function,
-then activate the line `#define USE_ATTACH_INTERRUPT` in *EasyButtonAtInt01.h* or
-define global symbol with `-DUSE_ATTACH_INTERRUPT` which is not yet possible in Arduino IDE :disappointed:.<br/>
+then insert the line `#define USE_ATTACH_INTERRUPT` in your program **before** the line `#include "EasyButtonAtInt01.hpp"`.
+
+<br/>
 
 
 # Compile options / macros for this library
@@ -156,7 +196,7 @@ These macros must be defined in your program **before** the line `#include "Easy
 Modify them by enabling / disabling them, or change the values if applicable.
 
 | Name | Default value | Description |
-|-|-|-|
+|-|-:|-|
 | `USE_BUTTON_0` | disabled | Enables code for button at INT0 (pin2 on 328P, PB6 on ATtiny167, PB2 on ATtinyX5). The macro INT0_PIN is set after the include. |
 | `USE_BUTTON_1` | disabled | Enables code for button at INT1 (pin3 on 328P, PA3 on ATtiny167, PCINT0 / PCx for ATtinyX5). The macro INT1_PIN is set after the include. |
 | `INT1_PIN` | % | It overrides the usage of pin at the processors INT1 pin. Thus, it is the pin number of the pin for button 1 to use with Pin Change Interrupts. |
@@ -172,20 +212,6 @@ Modify them by enabling / disabling them, or change the values if applicable.
 
 The exact pin numbers of the buttons used internally are available by the macros INT0_PIN and INT1_PIN, which are set after the include.
 
-### Changing include (*.h) files with Arduino IDE
-First, use *Sketch > Show Sketch Folder (Ctrl+K)*.<br/>
-If you have not yet saved the example as your own sketch, then you are instantly in the right library folder.<br/>
-Otherwise you have to navigate to the parallel `libraries` folder and select the library you want to access.<br/>
-In both cases the library source and include files are located in the libraries `src` directory.<br/>
-The modification must be renewed for each new library version!
-
-### Modifying compile options / macros with PlatformIO
-If you are using PlatformIO, you can define the macros in the *[platformio.ini](https://docs.platformio.org/en/latest/projectconf/section_env_build.html)* file with `build_flags = -D MACRO_NAME` or `build_flags = -D MACRO_NAME=macroValue`.
-
-### Modifying compile options / macros with Sloeber IDE
-If you are using [Sloeber](https://eclipse.baeyens.it) as your IDE, you can easily define global symbols with *Properties > Arduino > CompileOptions*.<br/>
-![Sloeber settings](https://github.com/Arduino-IRremote/Arduino-IRremote/blob/master/pictures/SloeberDefineSymbols.png)
-
 ## Class methods
 ```c++
 EasyButton(); // Constructor for button at INT0
@@ -200,6 +226,7 @@ void init(); // used by constructors
 #define EASY_BUTTON_DOUBLE_PRESS_DEFAULT_MILLIS 400
 
 bool readButtonState();
+bool readDebouncedButtonState();
 bool updateButtonState();
 uint16_t updateButtonPressDuration();
 uint8_t checkForLongPress(uint16_t aLongPressThresholdMillis = EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS);
@@ -209,7 +236,11 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
-###  Version 3.3.2 - work in progress
+###  Version 3.4.1 - work in progress
+
+###  Version 3.4.0
+- Added `NO_INITIALIZE_IN_CONSTRUCTOR` macro to enable late initializing.
+- `ButtonStateIsActive` is now private, since it is not reliable after bouncing. Use `readButtonState()` or `readDebouncedButtonState()` instead.
 
 ###  Version 3.3.1
 - Avoid mistakenly double press detection after boot.
@@ -255,8 +286,3 @@ The library examples are tested with GitHub Actions for the following boards:
 - digistump:avr:digispark-tiny1
 - digistump:avr:digispark-pro
 - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
-
-## Requests for modifications / extensions
-Please write me a PM including your motivation/problem if you need a modification or an extension e.g. PCINT* support for ATtiny85.
-
-#### If you find this library useful, please give it a star.

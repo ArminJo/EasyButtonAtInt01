@@ -61,10 +61,11 @@
 
 #include "EasyButtonAtInt01.hpp"
 
-// The callback function for button 0
-void handleButtonPress(bool aButtonToggleState);
+void handleButtonPress(bool aButtonToggleState);    // The callback function for button 0
 EasyButton Button0AtPin2(&handleButtonPress);       // Only callback parameter -> button is connected to INT0
 EasyButton Button1AtPin3(BUTTON_AT_INT1_OR_PCINT);  // Button is connected to INT1 or INT1_PIN if INT1_PIN is defined.
+#define LONG_PRESS_BUTTON_DURATION_MILLIS   1000
+bool sLongPressMessageSent = false;
 
 long sOldDeltaMillis;
 
@@ -87,6 +88,17 @@ void setup() {
 void loop() {
 
     /*
+     * Check for long press of button 0
+     */
+    if (!sLongPressMessageSent
+            && Button0AtPin2.checkForLongPress(LONG_PRESS_BUTTON_DURATION_MILLIS) == EASY_BUTTON_LONG_PRESS_DETECTED) {
+        Serial.print(F("Long press of "));
+        Serial.print(LONG_PRESS_BUTTON_DURATION_MILLIS);
+        Serial.println(F(" ms just detected"));
+        sLongPressMessageSent = true; // Print message only once per long press
+    }
+
+    /*
      * Button 1 - check manually here as demonstration, but it would be easier to just use a callback function like we do for button 0
      */
     Button1AtPin3.updateButtonState(); // this is ONLY required if we expect a regular button press which is shorter than BUTTON_DEBOUNCING_MILLIS!
@@ -99,7 +111,7 @@ void loop() {
          * Print new status
          */
         Serial.print(F("Button 1 IsActive="));
-        Serial.print(Button1AtPin3.ButtonStateIsActive);
+        Serial.print(Button1AtPin3.getButtonStateIsActive());
         Serial.print(F(" ToggleState="));
         Serial.print(Button1AtPin3.ButtonToggleState);
         if (!Button1AtPin3.readDebouncedButtonState()) {
@@ -112,6 +124,8 @@ void loop() {
 }
 
 void handleButtonPress(bool aButtonToggleState) {
+    sLongPressMessageSent = false; // reset flag
+
     /*
      * checkForDoublePress() works reliable only, if called early in press callback function
      */
