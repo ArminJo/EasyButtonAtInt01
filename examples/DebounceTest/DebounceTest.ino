@@ -74,7 +74,7 @@ void loop() {
          * Print new status
          */
         Serial.print(F("Button1 IsActive="));
-        Serial.print(Button0AtPin2.ButtonStateIsActive);
+        Serial.print(Button0AtPin2.getButtonStateIsActive());
         Serial.print(F(" ToggleState="));
         Serial.println(Button0AtPin2.ButtonToggleState);
     }
