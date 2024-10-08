@@ -20,7 +20,7 @@ Available as [Arduino library "EasyButtonAtInt01"](https://www.arduinolibraries.
 
 [![Button Install](https://img.shields.io/badge/Install-brightgreen?logoColor=white&logo=GitBook)](https://www.ardu-badge.com/EasyButtonAtInt01)
  &nbsp; &nbsp; 
-[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/EasyButtonAtInt01#revision-history)
+[![Button Changelog](https://img.shields.io/badge/Changelog-blue?logoColor=white&logo=AzureArtifacts)](https://github.com/ArminJo/EasyButtonAtInt01?tab=readme-ov-file#revision-history)
 
 </div>
 
@@ -211,6 +211,7 @@ Modify them by enabling / disabling them, or change the values if applicable.
 | `BUTTON_LED_FEEDBACK` | disabled | This activates LED_BUILTIN as long as button is pressed. |
 | `BUTTON_LED_FEEDBACK_PIN` | disabled | The pin to use for button LED feedback. |
 | `INTENTIONALLY_USE_PCI0_FOR_BUTTON1` | disabled | Activate it to suppress the warning: "Using PCINT0 interrupt for button 1". |
+| `USE_INT2_FOR_BUTTON_0` | disabled | Hack, especially for ATmega644 etc, where INT0 and INT1 are occupied by 2. USART. |
 
 The exact pin numbers of the buttons used internally are available by the macros INT0_PIN and INT1_PIN, which are set after the include.
 
@@ -240,6 +241,7 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 # Revision History
 ###  Version 3.4.1 - work in progress
 - Avoid wrong double press detection if calling checkForDoublePress() after release of button.
+- Hack for ATmega 644.
 
 ###  Version 3.4.0
 - Added `NO_INITIALIZE_IN_CONSTRUCTOR` macro to enable late initializing.

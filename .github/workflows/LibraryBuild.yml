@@ -42,8 +42,8 @@ jobs:
           - arduino:avr:leonardo
           - arduino:avr:mega
           - digistump:avr:digispark-pro
-#          - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
-#          - ATTinyCore:avr:attinyx7micr:sketchclock=1external16
+          - ATTinyCore:avr:attinyx5:chip=85,clock=1internal
+          - ATTinyCore:avr:attinyx7micr:sketchclock=1external16
 
         # Choose the right platform for the boards we want to test. (maybe in the future Arduino will automatically do this for you)
         # With sketches-exclude you may exclude specific examples for a board. Use a comma separated list.
@@ -52,15 +52,15 @@ jobs:
           - arduino-boards-fqbn: digistump:avr:digispark-pro
             platform-url: https://raw.githubusercontent.com/ArminJo/DigistumpArduino/master/package_digistump_index.json
 
-#          - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal # ATtiny85 board @1 MHz / Digispark
-#            platform-url: http://drazzy.com/package_drazzy.com_index.json
-#            build-properties:
-#              TwoButtons: -DTX_PIN=PB0
+          - arduino-boards-fqbn: ATTinyCore:avr:attinyx5:chip=85,clock=1internal # ATtiny85 board @1 MHz / Digispark
+            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            build-properties:
+              TwoButtons: -DTX_PIN=PB0
 
-#          - arduino-boards-fqbn: ATTinyCore:avr:attinyx7micr:sketchclock=1external16 # Digispark pro
-#            platform-url: http://drazzy.com/package_drazzy.com_index.json
-#            build-properties:
-#              TwoButtons: -DTX_PIN=PB0
+          - arduino-boards-fqbn: ATTinyCore:avr:attinyx7micr:sketchclock=1external16 # Digispark pro
+            platform-url: http://drazzy.com/package_drazzy.com_index.json
+            build-properties:
+              TwoButtons: -DTX_PIN=PB0
 
 
       # Do not cancel all jobs / architectures if one job fails
@@ -77,4 +77,4 @@ jobs:
           platform-url: ${{ matrix.platform-url }}
 #          sketches-exclude: ${{ matrix.sketches-exclude }}
           build-properties: ${{ toJson(matrix.build-properties) }}
-          cli-version: 0.33.0 # to avoid errors for ATTinyCore
+#          cli-version: 0.33.0 # to avoid errors for ATTinyCore

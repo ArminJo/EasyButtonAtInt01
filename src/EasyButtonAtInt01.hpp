@@ -15,7 +15,7 @@
  *  #include "EasyButtonAtInt01.hpp"
  *  EasyButton Button0AtPin2(true);
  *
- *  Copyright (C) 2018-2022  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2024  Armin Joachimsmeyer
  *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
@@ -222,6 +222,12 @@ void EasyButton::init(bool aIsButtonAtINT0) {
     sPointerToButton0ForISR = this;
 #  if defined(USE_ATTACH_INTERRUPT)
     attachInterrupt(digitalPinToInterrupt(INT0_PIN), &handleINT0Interrupt, CHANGE);
+
+#  elif defined(USE_INT2_FOR_BUTTON_0)
+    EICRA |= _BV(ISC20);  // interrupt on any logical change
+    EIFR |= _BV(INTF2);// clear interrupt bit
+    EIMSK |= _BV(INT2);// enable interrupt on next change
+
 #  else
     EICRA |= _BV(ISC00);  // interrupt on any logical change
     EIFR |= _BV(INTF0);// clear interrupt bit
@@ -340,7 +346,9 @@ void EasyButton::init(bool aIsButtonAtINT0) {
 }
 
 /*
- * Negative logic for readButtonState() true means button pin is LOW, if button is active low (default)
+ * if NOT defined BUTTON_IS_ACTIVE_HIGH we have negative logic for readButtonState()!
+ * In this case BUTTON_IS_ACTIVE (true) means button pin is LOW
+ * @return BUTTON_IS_ACTIVE (true) or BUTTON_IS_INACTIVE (false)
  */
 bool EasyButton::readButtonState() {
 #if defined(USE_BUTTON_0) && not defined(USE_BUTTON_1)
@@ -384,11 +392,14 @@ bool EasyButton::getButtonStateIsActive() {
 }
 /*
  * Returns stored state if in debouncing period otherwise current state of button
+ * If button is in bouncing period, we do not know button state, so it is only save to return BUTTON_IS_INACTIVE
+ * @return BUTTON_IS_ACTIVE (true) or BUTTON_IS_INACTIVE (false)
  */
 bool EasyButton::readDebouncedButtonState() {
-    // Check for bouncing period
+    // Check if we are in bouncing period
     if (millis() - ButtonLastChangeMillis <= BUTTON_DEBOUNCING_MILLIS) {
-        return ButtonStateIsActive;
+        // If button is in bouncing period, we do not know button state, so it is only save to return BUTTON_IS_INACTIVE
+        return BUTTON_IS_INACTIVE;
     }
     return readButtonState();
 }
@@ -445,14 +456,15 @@ uint16_t EasyButton::updateButtonPressDuration() {
  */
 uint8_t EasyButton::checkForLongPress(uint16_t aLongPressThresholdMillis) {
     uint8_t tRetvale = EASY_BUTTON_LONG_PRESS_ABORT;
-    if (readDebouncedButtonState()) {
+    // noInterrupts() is required, since otherwise we may get wrong results if interrupted during processing by button ISR
+    noInterrupts();
+    if (readDebouncedButtonState() != BUTTON_IS_INACTIVE) {
         // Button still active -> update current ButtonPressDurationMillis
-        // noInterrupts() is required, since otherwise we may get wrong results if interrupted during load of long value by button ISR
-        noInterrupts();
+
         ButtonPressDurationMillis = millis() - ButtonLastChangeMillis;
-        interrupts();
         tRetvale = EASY_BUTTON_LONG_PRESS_STILL_POSSIBLE; // if not detected, you may try again
     }
+    interrupts();
     if (ButtonPressDurationMillis >= aLongPressThresholdMillis) {
         // long press detected
         return EASY_BUTTON_LONG_PRESS_DETECTED;
@@ -716,8 +728,8 @@ void __attribute__ ((weak)) handleINT1Interrupt() {
 // ISR for PIN PD2
 // Cannot make the vector itself weak, since the vector table is already filled by weak vectors resulting in ignoring my weak one:-(
 //ISR(INT0_vect, __attribute__ ((weak))) {
-#  if defined(USE_BUTTON_0)
-ISR(INT0_vect) {
+#  if defined(USE_INT2_FOR_BUTTON_0)
+ISR(INT2_vect) {
 #    if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING)
     digitalWriteFast(INTERRUPT_TIMING_OUTPUT_PIN, HIGH);
 #    endif
@@ -726,6 +738,18 @@ ISR(INT0_vect) {
     digitalWriteFast(INTERRUPT_TIMING_OUTPUT_PIN, LOW);
 #    endif
 }
+#  else
+#    if defined(USE_BUTTON_0)
+ISR(INT0_vect) {
+#      if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING)
+    digitalWriteFast(INTERRUPT_TIMING_OUTPUT_PIN, HIGH);
+#      endif
+    handleINT0Interrupt();
+#      if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING)
+    digitalWriteFast(INTERRUPT_TIMING_OUTPUT_PIN, LOW);
+#      endif
+}
+#    endif
 #  endif
 
 #  if defined(USE_BUTTON_1)
