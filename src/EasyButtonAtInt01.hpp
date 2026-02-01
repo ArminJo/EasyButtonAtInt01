@@ -73,12 +73,6 @@
  *
  */
 
-#if defined(TRACE)
-#define LOCAL_TRACE
-#else
-//#define LOCAL_TRACE // This enables trace output only for this file
-#endif
-
 // For external measurement of code timing
 //#define MEASURE_EASY_BUTTON_INTERRUPT_TIMING
 #if defined(MEASURE_EASY_BUTTON_INTERRUPT_TIMING) || defined(BUTTON_LED_FEEDBACK)
@@ -95,8 +89,15 @@ EasyButton *EasyButton::sPointerToButton1ForISR;
 #error One of USE_BUTTON_0 or USE_BUTTON_1 must be defined
 #endif
 
+// After all includes
+#if defined(TRACE)
+#define LOCAL_TRACE
+#else
+//#define LOCAL_TRACE // This enables trace output only for this file
+#endif
+
 // The eclipse formatter has problems with // comments in undefined code blocks
-// !!! Must be without comment and closed by @formatter:on
+// !!! Must be without trailing comment and closed by @formatter:on
 // @formatter:off
 
 /*
@@ -221,7 +222,11 @@ void EasyButton::init(bool aIsButtonAtINT0) {
 #  endif
     sPointerToButton0ForISR = this;
 #  if defined(USE_ATTACH_INTERRUPT)
+#    if defined(ARDUINO_ARCH_SAMD) // see https://www.arduino.cc/reference/tr/language/functions/external-interrupts/attachinterrupt/ paragraph: Syntax
+    attachInterrupt(INT0_PIN, &handleINT1Interrupt, CHANGE);
+#    else
     attachInterrupt(digitalPinToInterrupt(INT0_PIN), &handleINT0Interrupt, CHANGE);
+#    endif
 
 #  elif defined(USE_INT2_FOR_BUTTON_0)
     EICRA |= _BV(ISC20);  // interrupt on any logical change
@@ -261,7 +266,11 @@ void EasyButton::init(bool aIsButtonAtINT0) {
     PCMSK2 = digitalPinToBitMask(INT1_PIN);
 #  else
 #    if defined(USE_ATTACH_INTERRUPT)
+#      if defined(ARDUINO_ARCH_SAMD) // see https://www.arduino.cc/reference/tr/language/functions/external-interrupts/attachinterrupt/ paragraph: Syntax
+    attachInterrupt(INT1_PIN, &handleINT1Interrupt, CHANGE);
+#      else
     attachInterrupt(digitalPinToInterrupt(INT1_PIN), &handleINT1Interrupt, CHANGE);
+#      endif
 #    else
     EICRA |= _BV(ISC10);  // interrupt on any logical change
     EIFR |= _BV(INTF1);     // clear interrupt bit
@@ -283,7 +292,11 @@ void EasyButton::init(bool aIsButtonAtINT0) {
 #  endif
         sPointerToButton0ForISR = this;
 #  if defined(USE_ATTACH_INTERRUPT)
+#    if defined(ARDUINO_ARCH_SAMD) // see https://www.arduino.cc/reference/tr/language/functions/external-interrupts/attachinterrupt/ paragraph: Syntax
+        attachInterrupt(INT1_PIN, &handleINT1Interrupt, CHANGE);
+#    else
         attachInterrupt(digitalPinToInterrupt(INT0_PIN), &handleINT0Interrupt, CHANGE);
+#    endif
 #  else
         EICRA |= _BV(ISC00);    // interrupt on any logical change
         EIFR |= _BV(INTF0);     // clear interrupt bit
@@ -331,7 +344,11 @@ void EasyButton::init(bool aIsButtonAtINT0) {
         PCMSK1 = digitalPinToBitMask(INT1_PIN);
 #  else
 #    if defined(USE_ATTACH_INTERRUPT)
+#      if defined(ARDUINO_ARCH_SAMD) // see https://www.arduino.cc/reference/tr/language/functions/external-interrupts/attachinterrupt/ paragraph: Syntax
+        attachInterrupt(INT1_PIN, &handleINT1Interrupt, CHANGE);
+#      else
         attachInterrupt(digitalPinToInterrupt(INT1_PIN), &handleINT1Interrupt, CHANGE);
+#      endif
 #    else
         // ATmega328 here
         EICRA |= _BV(ISC10);  // interrupt on any logical change
@@ -646,7 +663,7 @@ void EasyButton::handleINT01Interrupts() {
                 digitalWriteFast(BUTTON_LED_FEEDBACK_PIN, HIGH);
 #endif
                 ButtonToggleState = !ButtonToggleState;
-                if (ButtonPressCallback != NULL) {
+                if (ButtonPressCallback != nullptr) {
                     /*
                      * Call callback function.
                      * interrupts() is required if callback function needs more time to allow millis() to proceed.
@@ -677,7 +694,7 @@ void EasyButton::handleINT01Interrupts() {
                 ButtonPressDurationMillis = tDeltaMillis;
                 ButtonReleaseMillis = tMillis;
 #if !defined(NO_BUTTON_RELEASE_CALLBACK)
-                if (ButtonReleaseCallback != NULL) {
+                if (ButtonReleaseCallback != nullptr) {
                     /*
                      * Call callback function.
                      * interrupts() is required if callback function needs more time to allow millis() to proceed.

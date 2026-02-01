@@ -46,16 +46,26 @@ EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is 
 #define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
 #endif
 
+// Helper macro for getting a macro definition as string
+#if !defined(STR_HELPER) && !defined(STR)
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
+#endif
+
 void setup() {
 // initialize the digital pin as an output.
     pinMode(LED_BUILTIN, OUTPUT);
 
     Serial.begin(115200);
+
 #if defined(__AVR_ATmega32U4__) || defined(SERIAL_PORT_USBVIRTUAL) || defined(SERIAL_USB) /*stm32duino*/|| defined(USBCON) /*STM32_stm32*/ \
     || defined(SERIALUSB_PID)  || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_attiny3217)
-    delay(4000); // To be able to connect Serial monitor after reset or power up and before first print out. Do not wait for an attached Serial Monitor!
+    // Wait until Serial Monitor is attached.
+    // Required for boards using USB code for Serial like Leonardo.
+    // Is void for USB Serial implementations using external chips e.g. a CH340.
+    while (!Serial)
+        ;
+    // !!! Program will not proceed if no Serial Monitor is attached !!!
 #endif
     // Just to know which program is running on my Arduino
     Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));

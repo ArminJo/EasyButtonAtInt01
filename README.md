@@ -123,7 +123,7 @@ The easiest way is to use the button release handler. Keep in mind, that you wil
 #include "EasyButtonAtInt01.hpp"
 
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
-EasyButton Button0AtPin2(NULL, &handleButtonRelease); // Button is connected to INT0 (pin2)
+EasyButton Button0AtPin2(nullptr, &handleButtonRelease); // Button is connected to INT0 (pin2)
 
 handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {
     if (aButtonPressDurationMillis >= EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS) { // 400 ms
