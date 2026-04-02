@@ -5,7 +5,7 @@ Lightweight Arduino library for handling push buttons just connected between gro
 
 [![Badge License: GPLv3](https://img.shields.io/badge/License-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
  &nbsp; &nbsp; 
-[![Badge Version](https://img.shields.io/github/v/release/ArminJo/EasyButtonAtInt01?include_prereleases&color=yellow&logo=DocuSign&logoColor=white)](https://github.com/ArminJo/EasyButtonAtInt01/releases/latest)
+[![Badge Version](https://img.shields.io/github/v/release/ArminJo/EasyButtonAtInt01?color=yellow&logo=DocuSign&logoColor=white)](https://github.com/ArminJo/EasyButtonAtInt01/releases/latest)
  &nbsp; &nbsp; 
 [![Badge Commits since latest](https://img.shields.io/github/commits-since/ArminJo/EasyButtonAtInt01/latest?color=yellow)](https://github.com/ArminJo/EasyButtonAtInt01/commits/master)
  &nbsp; &nbsp; 
@@ -239,7 +239,7 @@ bool checkForForButtonNotPressedTime(uint16_t aTimeoutMillis);
 ```
 
 # Revision History
-###  Version 3.4.1 - work in progress
+###  Version 3.4.1
 - Avoid wrong double press detection if calling checkForDoublePress() after release of button.
 - Hack for ATmega 644.
 
