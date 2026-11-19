@@ -2,7 +2,6 @@
  * ATtinySerialOut.h
  *
  *  Copyright (C) 2015-2024  Armin Joachimsmeyer
- *  Email: armin.joachimsmeyer@gmail.com
  *
  *  This file is part of TinySerialOut https://github.com/ArminJo/ATtinySerialOut.
  *
@@ -17,7 +16,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
@@ -86,7 +85,9 @@
  * Macro to convert 3 version parts into an integer
  * To be used in preprocessor comparisons, such as #if VERSION_ATTINY_SERIAL_OUT_HEX >= VERSION_HEX_VALUE(3, 0, 0)
  */
-#define VERSION_HEX_VALUE(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#if !defined(VERSION_HEX_VALUE)
+#define VERSION_HEX_VALUE(major, minor, patch) (((major) << 16) | ((minor) << 8) | (patch))
+#endif
 #define VERSION_ATTINY_SERIAL_OUT_HEX  VERSION_HEX_VALUE(VERSION_ATTINY_SERIAL_OUT_MAJOR, VERSION_ATTINY_SERIAL_OUT_MINOR, VERSION_ATTINY_SERIAL_OUT_PATCH)
 
 #if (F_CPU != 1000000) &&  (F_CPU != 8000000) &&  (F_CPU != 16000000)

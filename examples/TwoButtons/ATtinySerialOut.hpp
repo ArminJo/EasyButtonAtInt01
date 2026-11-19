@@ -14,7 +14,6 @@
  *
  *
  *  Copyright (C) 2015-2024  Armin Joachimsmeyer
- *  Email: armin.joachimsmeyer@gmail.com
  *
  *  This file is part of TinySerialOut https://github.com/ArminJo/ATtinySerialOut.
  *
@@ -29,7 +28,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 

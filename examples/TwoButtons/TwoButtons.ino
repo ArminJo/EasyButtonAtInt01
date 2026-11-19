@@ -6,7 +6,6 @@
  *  Button 1 is using INT1 or INT1_PIN with PinChangeInterrupt, if INT1_PIN is defined.
  *
  *  Copyright (C) 2018-2022  Armin Joachimsmeyer
- *  armin.joachimsmeyer@gmail.com
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
  *
@@ -21,7 +20,7 @@
  *  See the GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program. If not, see <http://www.gnu.org/licenses/gpl.html>.
+ *  along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.html>.
  *
  */
 
