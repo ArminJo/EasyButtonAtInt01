@@ -1,10 +1,10 @@
 /*
- *  DebounceTest.cpp
+ *  DebounceTest.ino
  *
  *  Test button with reduced debounce time.
  *  If one bounce is not suppressed, the internal LED sometimes toggles because of bouncing.
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
  *
@@ -26,23 +26,18 @@
 #include <Arduino.h>
 
 //#define USE_ATTACH_INTERRUPT // enable it if you get the error " multiple definition of `__vector_1'" (or `__vector_2')
-//#define MEASURE_INTERRUPT_TIMING
+//#define MEASURE_EASY_BUTTON_INTERRUPT_TIMING
 
 #define ANALYZE_MAX_BOUNCING_PERIOD
-#define BUTTON_DEBOUNCING_MILLIS 2
+//#define BUTTON_DEBOUNCING_MILLIS 10 // test if button works reliable with low value
 
 #define USE_BUTTON_0  // Enable code for 1. button at INT0
 #include "EasyButtonAtInt01.hpp"
 
 EasyButton Button0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
 
-#if defined(ARDUINO_AVR_DIGISPARK)
-#define LED_BUILTIN PB1
-#elif defined(ARDUINO_AVR_DIGISPARKPRO)
-// On a Digispark Pro we have PB1 / D9 / PCB pin 1
-#define LED_BUILTIN (9)
-#elif ! defined(LED_BUILTIN)
-#define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
+#if !defined(LED_BUILTIN) && (defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__))
+#define LED_BUILTIN     PIN_PB1 // define port of built in LED for your ATtiny board
 #endif
 
 // Helper macro for getting a macro definition as string
@@ -70,9 +65,10 @@ void setup() {
     Serial.println(F("START " __FILE__ "\r\nUsing library version " VERSION_EASY_BUTTON " from " __DATE__));
     Serial.print(F("Button pin="));
     Serial.println(INT0_PIN);
-
-    Serial.println(F("Button debouncing time is reduced to " STR(BUTTON_DEBOUNCING_MILLIS) " ms"));
-    Serial.println(F("Please press the button and watch for \"Bouncing, MBP=...\" output at the Serial Monitor"));
+    Serial.println(F("Button retriggerable debouncing time is " STR(BUTTON_DEBOUNCING_MILLIS) " ms"));
+#if defined(ANALYZE_MAX_BOUNCING_PERIOD)
+    Serial.println(F("Please press the button and watch for \"MaxBouncingPeriod=...\" output at the Serial Monitor"));
+#endif
 }
 
 void loop() {
@@ -83,8 +79,8 @@ void loop() {
         /*
          * Print new status
          */
-        Serial.print(F("Button1 IsActive="));
-        Serial.print(Button0AtPin2.getButtonStateIsActive());
+        Serial.print(F("Button0 IsActive="));
+        Serial.print(Button0AtPin2.getStoredButtonState());
         Serial.print(F(" ToggleState="));
         Serial.println(Button0AtPin2.ButtonToggleState);
     }

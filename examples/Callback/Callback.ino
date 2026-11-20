@@ -1,9 +1,9 @@
 /*
- *  Callback.cpp
+ *  Callback.ino
  *
  *  Example for use of callback function at button press as well as double press detection.
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
  *
@@ -33,16 +33,12 @@ void handleButtonPress(bool aButtonToggleState);    // The button press callback
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis);
 EasyButton Button0AtPin2(&handleButtonPress, &handleButtonRelease); // Button is connected to INT0 (pin2)
 
-#if defined(ARDUINO_AVR_DIGISPARK)
-#define LED_BUILTIN PB1
-#elif defined(ARDUINO_AVR_DIGISPARKPRO)
-// On a Digispark Pro we have PB1 / D9 / PCB pin 1
-#define LED_BUILTIN (9)
-#elif ! defined(LED_BUILTIN)
-#define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
+#if !defined(LED_BUILTIN) && (defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__))
+#define LED_BUILTIN     PIN_PB1 // define port of built in LED for your ATtiny board
 #endif
-#define BLINK_SHORT_MILLIS 200
-#define BLINK_LONG_MILLIS 600
+
+#define BLINK_SHORT_MILLIS 500
+#define BLINK_LONG_MILLIS 1000
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -76,36 +72,52 @@ void blinkLEDBlocking(uint8_t aLedPin, uint8_t aBlinkCount, uint16_t aDelay) {
  * @param aButtonToggleState Initial value is false, so first call is with true
  */
 void handleButtonPress(bool aButtonToggleState) {
+    Serial.println(F("Button pressed"));
+    digitalWrite(LED_BUILTIN, aButtonToggleState);
+
     /*
-     * Double press (< 200 ms) detection by calling checkForForDoublePress() once at button press time.
+     * Double press (< 300 ms) detection by calling checkForDoublePress() once at button press time.
      */
     if (Button0AtPin2.checkForDoublePress(300)) {
         Serial.print(F("Double press "));
         Serial.print(Button0AtPin2.ButtonLastChangeMillis - Button0AtPin2.ButtonReleaseMillis);
-        Serial.println(F(" ms detected"));
+        Serial.println(F(" ms detected -> blink 2 times short"));
 
-        // let the led blink twice short
-        blinkLEDBlocking(2, LED_BUILTIN, BLINK_SHORT_MILLIS);
-        Button0AtPin2.ButtonToggleState = false;
+        /*
+         * Let the led blink long.
+         * This blocks the ISR!
+         * But because we have interrupts enabled
+         * even new button presses during this period are detected and printed.
+         * Only stack usage grows!
+         */
+            blinkLEDBlocking(LED_BUILTIN, 2, BLINK_SHORT_MILLIS);
+        Button0AtPin2.ButtonToggleState = false; // set toggle state according to LED level
     }
-    Serial.println(F("Button pressed"));
-    digitalWrite(LED_BUILTIN, aButtonToggleState);
+
 }
 
+/*
+ * Print if press was longer than 400 ms
+ */
 void handleButtonRelease(bool aButtonToggleState, uint16_t aButtonPressDurationMillis) {
     digitalWrite(LED_BUILTIN, aButtonToggleState);
-    Serial.println(F("Button released"));
+    Serial.print(F("Button released, duration="));
+    Serial.print(aButtonPressDurationMillis);
+    Serial.println(F(" ms"));
 
     /*
      * Simple long press (> 400 ms) detection
      */
     if (aButtonPressDurationMillis >= EASY_BUTTON_LONG_PRESS_DEFAULT_MILLIS) {
-        Serial.print(F("Long press "));
-        Serial.print(aButtonPressDurationMillis);
-        Serial.println(F(" ms detected"));
-
-        // let the led blink long
-        blinkLEDBlocking(2, LED_BUILTIN, BLINK_LONG_MILLIS);
-        Button0AtPin2.ButtonToggleState = false;
+        Serial.println(F("Long press -> blink 2 times long"));
+        /*
+         * Let the led blink long.
+         * This blocks the ISR!
+         * But because we have interrupts enabled
+         * even new button presses during this period are detected and printed.
+         * Only stack usage grows!
+         */
+        blinkLEDBlocking(LED_BUILTIN, 2, BLINK_LONG_MILLIS); // 1000 ms
+        Button0AtPin2.ButtonToggleState = false; // set toggle state according to LED level
     }
 }

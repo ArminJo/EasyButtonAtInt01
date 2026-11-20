@@ -1,12 +1,12 @@
 {
   "name": "EasyButtonAtInt01",
   "keywords": "Button, debounce, interrupt",
-  "description": "Small and easy to use Arduino library for using push buttons at any PinChangeInterrupt pin. Automatic debouncing, no delay required.",
+  "description": "Small and easy to use Arduino library for using push buttons at any PinChangeInterrupt pin. Automatic debouncing, no delay required. Functions for long and double press detection are included.",
   "repository": {
     "type": "git",
     "url": "https://github.com/ArminJo/EasyButtonAtInt01"
   },
-  "version": "3.4.1",
+  "version": "4.0.0",
   "exclude": "pictures",
   "authors": {
     "name": "Armin Joachimsmeyer",

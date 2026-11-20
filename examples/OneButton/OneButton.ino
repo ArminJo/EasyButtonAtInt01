@@ -1,9 +1,9 @@
 /*
- *  OneButton.cpp
+ *  OneButton.ino
  *
  *  Connect the button between pin 2 (ATtinyX7 pin 14) and ground.
  *
- *  Copyright (C) 2018  Armin Joachimsmeyer
+ *  Copyright (C) 2018-2026  Armin Joachimsmeyer
  *
  *  This file is part of EasyButtonAtInt01 https://github.com/ArminJo/EasyButtonAtInt01.
  *
@@ -30,13 +30,8 @@
 
 #include "EasyButtonAtInt01.hpp"
 
-#if defined(ARDUINO_AVR_DIGISPARK)
-#define LED_BUILTIN PB1
-#elif defined(ARDUINO_AVR_DIGISPARKPRO)
-// On a Digispark Pro we have PB1 / D9 / PCB pin 1
-#define LED_BUILTIN (9)
-#elif ! defined(LED_BUILTIN)
-#define LED_BUILTIN PB1 // define port of built in LED for your ATtiny
+#if !defined(LED_BUILTIN) && (defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny167__))
+#define LED_BUILTIN     PIN_PB1 // define port of built in LED for your ATtiny board
 #endif
 
 EasyButton PageSwitchButton0AtPin2; // Only 1. button (USE_BUTTON_0) enabled -> button is connected to INT0
@@ -59,7 +54,7 @@ void loop() {
     delay(10);
     /*
      * Manually check button state change
-     * Using a callback function is sometimes easier, see EasyButtonExample and Callback example.
+     * Using a callback function is sometimes easier, see TwoButtons and Callback examples.
      */
     if (PageSwitchButton0AtPin2.ButtonStateHasJustChanged) {
         // reset flag in order to do call digitalWrite() only once per button press
